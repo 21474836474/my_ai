@@ -1,7 +1,25 @@
-# my_ai
-**I make an AI by myself,no TRANSFORMER**  
+# My AI
 
-**how to run**  
-1.download all  
-2.prepare train.txt(**nessary**) and knowledge.txt(**unnessary**) with "UTF-8 without BOM"  
-3.click that .exe twice(**only Windows**)
+> I make an AI by myself, no TRANSFORMER, no RNN, no GNN, no GPU.
+
+这是一个从零实现的**生长型脉冲神经网络**。不依赖任何主流框架，不靠反向传播，没有矩阵乘法，纯C++手写。
+
+## 🧠 它是什么？
+
+**它不是Transformer，不是RNN，不是GNN。**
+
+它是我自己定义的一种神经网络架构——
+
+- 神经元在训练中**动态生长**
+- 连接根据共现关系**自动建立、增强或衰减**
+- 信号通过**脉冲激活**在图中传播
+- 内存占用会自然增长到**稳态平衡**
+
+通俗地说：它更像一个“会学习的生物脑”，而不是一个“堆参数的大模型”。
+
+## 🚀 怎么跑？
+
+
+1. 下载本仓库
+2. 准备 train.txt（**必须**）/ knowledge.txt（**可选**）**（UTF-8 without BOM 编码）**
+3. 双击 未命名23.exe（Windows）
