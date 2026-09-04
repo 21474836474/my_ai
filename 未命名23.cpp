@@ -20,24 +20,24 @@
 #include <atomic>
 #include <windows.h>
 #include <thread>
-// ========== ĞÂÔö£ºCppJieba Í·ÎÄ¼ş ==========
+// ========== æ–°å¢ï¼šCppJieba å¤´æ–‡ä»¶ ==========
 #include "cppjieba\include\cppjieba\Jieba.hpp"
 #include <omp.h>
 #include <ctime>
 #include <iomanip>
 using namespace std;
 
-// ===================== ÈÕÖ¾ÏµÍ³ =====================
+// ===================== æ—¥å¿—ç³»ç»Ÿ =====================
 class Logger {
 private:
     ofstream logFile;
     mutex logMtx;
-    bool fileEnabled = false;      // ÊÇ·ñĞ´ÈëÎÄ¼ş
-    bool consoleEnabled = true;    // ÊÇ·ñÊä³öµ½¿ØÖÆÌ¨£¨Ä¬ÈÏ¿ªÆô£©
+    bool fileEnabled = false;      // æ˜¯å¦å†™å…¥æ–‡ä»¶
+    bool consoleEnabled = true;    // æ˜¯å¦è¾“å‡ºåˆ°æ§åˆ¶å°ï¼ˆé»˜è®¤å¼€å¯ï¼‰
     
 public:
     Logger() {
-        // ÏÈ²»´ò¿ªÎÄ¼ş£¬µÈÓÃ»§È·ÈÏºóÔÙ´ò¿ª
+        // å…ˆä¸æ‰“å¼€æ–‡ä»¶ï¼Œç­‰ç”¨æˆ·ç¡®è®¤åå†æ‰“å¼€
     }
     
     ~Logger() {
@@ -46,7 +46,7 @@ public:
         }
     }
     
-    // ÆôÓÃÎÄ¼şÈÕÖ¾
+    // å¯ç”¨æ–‡ä»¶æ—¥å¿—
     void enable(const string& filename = "log.txt") {
         if (logFile.is_open()) {
             logFile.close();
@@ -54,39 +54,39 @@ public:
         logFile.open(filename, ios::out | ios::trunc);
         if (logFile.is_open()) {
             fileEnabled = true;
-            cout << "[ÈÕÖ¾] ÎÄ¼şÈÕÖ¾ÒÑÆôÓÃ£¬Ğ´Èë " << filename << endl;
+            cout << "[æ—¥å¿—] æ–‡ä»¶æ—¥å¿—å·²å¯ç”¨ï¼Œå†™å…¥ " << filename << endl;
         } else {
-            cout << "[ÈÕÖ¾] ÎŞ·¨´´½¨ÈÕÖ¾ÎÄ¼ş" << endl;
+            cout << "[æ—¥å¿—] æ— æ³•åˆ›å»ºæ—¥å¿—æ–‡ä»¶" << endl;
             fileEnabled = false;
         }
     }
     
-    // ½ûÓÃÎÄ¼şÈÕÖ¾
+    // ç¦ç”¨æ–‡ä»¶æ—¥å¿—
     void disable() {
         fileEnabled = false;
         if (logFile.is_open()) {
             logFile.close();
         }
-        cout << "[ÈÕÖ¾] ÎÄ¼şÈÕÖ¾ÒÑ½ûÓÃ" << endl;
+        cout << "[æ—¥å¿—] æ–‡ä»¶æ—¥å¿—å·²ç¦ç”¨" << endl;
     }
     
-    // ¿ØÖÆÌ¨¿ª¹Ø
+    // æ§åˆ¶å°å¼€å…³
     void enableConsole(bool enable) {
         consoleEnabled = enable;
     }
     
-    // ÊÇ·ñÆôÓÃ
+    // æ˜¯å¦å¯ç”¨
     bool isFileEnabled() const { return fileEnabled; }
     bool isConsoleEnabled() const { return consoleEnabled; }
     
-    // ºËĞÄÈÕÖ¾º¯Êı
+    // æ ¸å¿ƒæ—¥å¿—å‡½æ•°
     void log(const string& msg, bool forceConsole = false) {
-        // ¿ØÖÆÌ¨Êä³ö£¨³ı·ÇÇ¿ÖÆÒş²Ø£©
+        // æ§åˆ¶å°è¾“å‡ºï¼ˆé™¤éå¼ºåˆ¶éšè—ï¼‰
         if (consoleEnabled || forceConsole) {
             cout << msg << endl;
         }
         
-        // ÎÄ¼şÊä³ö
+        // æ–‡ä»¶è¾“å‡º
         if (!fileEnabled) return;
         
         lock_guard<mutex> lock(logMtx);
@@ -102,30 +102,30 @@ public:
         }
     }
     
-    // µ÷ÊÔÈÕÖ¾£¨ÊÜ¿ª¹Ø¿ØÖÆ£©
+    // è°ƒè¯•æ—¥å¿—ï¼ˆå—å¼€å…³æ§åˆ¶ï¼‰
     void logDebug(const string& msg) {
         log("[DEBUG] " + msg);
     }
     
-    // ´íÎóÈÕÖ¾£¨Ç¿ÖÆÊä³öµ½¿ØÖÆÌ¨£©
+    // é”™è¯¯æ—¥å¿—ï¼ˆå¼ºåˆ¶è¾“å‡ºåˆ°æ§åˆ¶å°ï¼‰
     void logError(const string& msg) {
         log("[ERROR] " + msg, true);  // forceConsole = true
     }
     
-    // ĞÅÏ¢ÈÕÖ¾
+    // ä¿¡æ¯æ—¥å¿—
     void logInfo(const string& msg) {
         log("[INFO] " + msg);
     }
     
-    // ¹Ø¼üĞÅÏ¢£¨Ç¿ÖÆÊä³ö£©
+    // å…³é”®ä¿¡æ¯ï¼ˆå¼ºåˆ¶è¾“å‡ºï¼‰
     void logImportant(const string& msg) {
-        log("[ÖØÒª] " + msg, true);
+        log("[é‡è¦] " + msg, true);
     }
 };
 
-// È«¾ÖÈÕÖ¾¶ÔÏó
+// å…¨å±€æ—¥å¿—å¯¹è±¡
 Logger logger;
-// ===================== ³¬²Î =====================
+// ===================== è¶…å‚ =====================
 const int epochs = 3;
 struct HyperParams {
     int MAX_GEN_STEP = 100;
@@ -175,11 +175,11 @@ struct HyperParams {
     int CONSCIOUSNESS_REPORT_INTERVAL = 3;
     float CURIOSITY_BOOST = 1.5f;
     int INNER_GOAL_CHECK_INTERVAL = 5;
-	// ========== ĞÂÔö£ºÔ¤²âÎó²îÏà¹Ø²ÎÊı ==========
-    float ERROR_LEARNING_RATE = 0.3f;        // Îó²îÑ§Ï°ÂÊ
-    float SURPRISE_THRESHOLD = 3.0f;         // ´¥·¢·´ÏòÍÆÀíµÄ¾ªÏ²ãĞÖµ
-    float ERROR_DECAY_RATE = 0.7f;           // Îó²îË¥¼õÂÊ
-    int MAX_ERROR_HISTORY = 20;              // Ã¿¸ö±ß±£ÁôµÄÎó²îÀúÊ·
+	// ========== æ–°å¢ï¼šé¢„æµ‹è¯¯å·®ç›¸å…³å‚æ•° ==========
+    float ERROR_LEARNING_RATE = 0.3f;        // è¯¯å·®å­¦ä¹ ç‡
+    float SURPRISE_THRESHOLD = 3.0f;         // è§¦å‘åå‘æ¨ç†çš„æƒŠå–œé˜ˆå€¼
+    float ERROR_DECAY_RATE = 0.7f;           // è¯¯å·®è¡°å‡ç‡
+    int MAX_ERROR_HISTORY = 20;              // æ¯ä¸ªè¾¹ä¿ç•™çš„è¯¯å·®å†å²
     map<string, pair<int, int>> safeRanges = {
         {"MAX_GEN_STEP", {50, 300}}, {"VOCAB_SIZE", {10000, 100000}},
         {"EDGE_DECAY_STEP", {10, 50}}, {"PRUNE_WEIGHT_THRESH", {1, 5}},
@@ -229,15 +229,15 @@ struct pair_hash {
         return hash<T1>{}(p.first) ^ (hash<T2>{}(p.second)<<1);
     }
 };
-// Óï¾³¿ìÕÕ£¬ÓÃÓÚÇø·Ö²»Í¬ÉÏÏÂÎÄÖĞµÄ¹ØÏµÇ¿¶È
+// è¯­å¢ƒå¿«ç…§ï¼Œç”¨äºåŒºåˆ†ä¸åŒä¸Šä¸‹æ–‡ä¸­çš„å…³ç³»å¼ºåº¦
 struct ContextSnapshot {
-    int prevPos;       // Ç°Ò»¸ö´ÊµÄ´ÊĞÔ (AutoPosType)
-    int nextPos;       // ºóÒ»¸ö´ÊµÄ´ÊĞÔ
-    int prevToken;     // Ç°Ò»¸ö´ÊµÄ token ID
-    int nextToken;     // ºóÒ»¸ö´ÊµÄ token ID
-    int logicType;     // Âß¼­¹ØÏµÀàĞÍ (LogicRelation)
-    bool isStart;      // ÊÇ·ñ¾äÊ×
-    bool isEnd;        // ÊÇ·ñ¾äÎ²
+    int prevPos;       // å‰ä¸€ä¸ªè¯çš„è¯æ€§ (AutoPosType)
+    int nextPos;       // åä¸€ä¸ªè¯çš„è¯æ€§
+    int prevToken;     // å‰ä¸€ä¸ªè¯çš„ token ID
+    int nextToken;     // åä¸€ä¸ªè¯çš„ token ID
+    int logicType;     // é€»è¾‘å…³ç³»ç±»å‹ (LogicRelation)
+    bool isStart;      // æ˜¯å¦å¥é¦–
+    bool isEnd;        // æ˜¯å¦å¥å°¾
 
     uint64_t hash() const {
         uint64_t h = 0;
@@ -252,7 +252,7 @@ struct ContextSnapshot {
     }
 };
 struct DynamicEdge {
-	int decayAge = 0;  // ×ÔÉÏ´ÎÇ¿»¯ÒÔÀ´µÄË¥¼õ²½Êı
+	int decayAge = 0;  // è‡ªä¸Šæ¬¡å¼ºåŒ–ä»¥æ¥çš„è¡°å‡æ­¥æ•°
     int target;
     int weight;
     int permanent;
@@ -260,15 +260,15 @@ struct DynamicEdge {
     LogicRelation logic;
     std::unordered_map<uint64_t, int> contextWeights;
 
-    // ========== ĞÂÔö£ºÔ¤²âÎó²îÏà¹Ø ==========
-    float predictionError = 0.0f;        // ½üÆÚÔ¤²âÎó²îÀÛ»ı
-    int errorUpdateCount = 0;            // ¸üĞÂ´ÎÊı
-    deque<float> errorHistory;           // Îó²îÀúÊ·£¨ÓÃÓÚÇ÷ÊÆ·ÖÎö£©
+    // ========== æ–°å¢ï¼šé¢„æµ‹è¯¯å·®ç›¸å…³ ==========
+    float predictionError = 0.0f;        // è¿‘æœŸé¢„æµ‹è¯¯å·®ç´¯ç§¯
+    int errorUpdateCount = 0;            // æ›´æ–°æ¬¡æ•°
+    deque<float> errorHistory;           // è¯¯å·®å†å²ï¼ˆç”¨äºè¶‹åŠ¿åˆ†æï¼‰
 
     DynamicEdge() : target(-1), weight(0), permanent(0), lifeCycle(19), logic(LOGIC_NONE) {}
     DynamicEdge(int t) : target(t), weight(0), permanent(0), lifeCycle(19), logic(LOGIC_NONE) {}
 
-    // ¸üĞÂÎó²î
+    // æ›´æ–°è¯¯å·®
     void updateError(float error) {
         predictionError = predictionError * 0.7f + error * 0.3f;
         errorUpdateCount++;
@@ -276,7 +276,7 @@ struct DynamicEdge {
         if (errorHistory.size() > 20) errorHistory.pop_front();
     }
 
-    // Îó²îÇ÷ÊÆ£¨Õı=Îó²îÔö´ó£¬¸º=Îó²î¼õĞ¡£©
+    // è¯¯å·®è¶‹åŠ¿ï¼ˆæ­£=è¯¯å·®å¢å¤§ï¼Œè´Ÿ=è¯¯å·®å‡å°ï¼‰
     float errorTrend() const {
         if (errorHistory.size() < 5) return 0;
         float recent = 0, old = 0;
@@ -286,7 +286,7 @@ struct DynamicEdge {
         return (recent/5.0f) - (old/5.0f);
     }
 
-    // Ìí¼ÓÉÏÏÂÎÄÈ¨ÖØ
+    // æ·»åŠ ä¸Šä¸‹æ–‡æƒé‡
     void addContext(const ContextSnapshot& snap, int delta = 1) {
         uint64_t h = snap.hash();
         contextWeights[h] += delta;
@@ -307,7 +307,7 @@ struct DynamicEdge {
     float importance() const {
         float imp = permanent * 2.0f + weight + lifeCycle / 10.0f;
         for (auto& kv : contextWeights) imp += kv.second / 20.0f;
-        // ¸ßÎó²îÔö¼ÓÖØÒªĞÔ£¨ĞèÒª¹Ø×¢£©
+        // é«˜è¯¯å·®å¢åŠ é‡è¦æ€§ï¼ˆéœ€è¦å…³æ³¨ï¼‰
         if (predictionError > 5.0f) imp += predictionError * 0.5f;
         return imp;
     }
@@ -321,7 +321,7 @@ struct DynamicEdge {
 	        return;
 	    }
 	
-	    decayAge++;  // ÏÖÔÚÃ¿¸ö±ß¶ÀÁ¢¼ÆÊı
+	    decayAge++;  // ç°åœ¨æ¯ä¸ªè¾¹ç‹¬ç«‹è®¡æ•°
 	    const float decayFactor = 0.03f;
 	    float fWeight = (float)weight;
 	    fWeight = fWeight / (1.0f + decayAge * decayFactor);
@@ -331,12 +331,12 @@ struct DynamicEdge {
 	
 	void boost() {
 	    weight += 10;
-	    lifeCycle = hp.EDGE_DECAY_STEP;  // ÖØÖÃ¿íÏŞÆÚ
+	    lifeCycle = hp.EDGE_DECAY_STEP;  // é‡ç½®å®½é™æœŸ
 	    decayAge = 0; 
-	    // ÓÀ¾Ã»¯ÃÅ¼÷½µµÍ£¬ÇÒÓÀ¾Ã»¯ºó²»ÔÙÑüÕ¶
+	    // æ°¸ä¹…åŒ–é—¨æ§›é™ä½ï¼Œä¸”æ°¸ä¹…åŒ–åä¸å†è…°æ–©
 	    if (weight >= hp.PERMANENT_WEIGHT_THRESH) {
 	        permanent += 1;
-	        // É¾³ı weight /= 2;  // ²»ÔÙÑüÕ¶£¡
+	        // åˆ é™¤ weight /= 2;  // ä¸å†è…°æ–©ï¼
 	    }
 	}
 	
@@ -344,12 +344,12 @@ struct DynamicEdge {
 	    weight += val;
 	    lifeCycle = hp.EDGE_DECAY_STEP;
 	    decayAge = 0; 
-	    // ÓÀ¾Ã»¯£ºÃ¿Âú50µãÈ¨ÖØ×ª1µãÓÀ¾Ã£¬±£ÁôÊ£ÓàÈ¨ÖØ
+	    // æ°¸ä¹…åŒ–ï¼šæ¯æ»¡50ç‚¹æƒé‡è½¬1ç‚¹æ°¸ä¹…ï¼Œä¿ç•™å‰©ä½™æƒé‡
 	    if (weight >= hp.PERMANENT_WEIGHT_THRESH) {
 	        int newPermanent = weight / hp.PERMANENT_WEIGHT_THRESH;
 	        permanent += newPermanent;
-	        weight = weight % hp.PERMANENT_WEIGHT_THRESH;  // ±£ÁôÓàÊı
-	        // Èç¹ûÓàÊıÌ«Ğ¡£¬¸ø¸ö±£µ×
+	        weight = weight % hp.PERMANENT_WEIGHT_THRESH;  // ä¿ç•™ä½™æ•°
+	        // å¦‚æœä½™æ•°å¤ªå°ï¼Œç»™ä¸ªä¿åº•
 	        if (weight < 5 && permanent > 0) weight += 5;
 	    }
 	}
@@ -389,7 +389,7 @@ struct GlobalWorkspace {
         content.clear();
     }
 };
-// ========== Ô¤²âÎó²îÏà¹Ø ==========
+// ========== é¢„æµ‹è¯¯å·®ç›¸å…³ ==========
 struct PredictionRecord {
     int predictedToken;
     int actualToken;
@@ -399,7 +399,7 @@ struct PredictionRecord {
     chrono::system_clock::time_point timestamp;
 };
 struct Neuron {
-    // »ù´¡ÊôĞÔ
+    // åŸºç¡€å±æ€§
     int neuronId = 0;
     int layer = 0;
     int potential = 0;
@@ -416,39 +416,39 @@ struct Neuron {
     unordered_set<int> boundTokens;
     vector<pair<int, int>> tokenScoreVec;
 
-    // ÊäÈë/Êä³ö±ß
+    // è¾“å…¥/è¾“å‡ºè¾¹
     vector<DynamicEdge> inputs;
     vector<DynamicEdge> outputs;
 
-    // ´«²¥Ïà¹Ø
+    // ä¼ æ’­ç›¸å…³
     int layerFeature = 0;
     int inactiveSteps = 0;
 
-    // ÍÆÀí¼ÇÂ¼
+    // æ¨ç†è®°å½•
     vector<ReasoningTrace> reasoningLinks;
     unordered_map<int, LogicRelation> tokenLogicMap;
 
-    // ---------- Óï¾³Í°£ºÓï¾³ID ¡ú Ä¿±êtokenÁĞ±í ----------
+    // ---------- è¯­å¢ƒæ¡¶ï¼šè¯­å¢ƒID â†’ ç›®æ ‡tokenåˆ—è¡¨ ----------
     vector<vector<int>> contextBuckets;
 
-    // ---------- ĞÂÔö£ºÎ»ÖÃ¹ì¼£ ----------
-    // Óï¾³ID ¡ú ¸ÃtokenÔÚ¸ÃÓï¾³ÏÂ³öÏÖµÄÎ»ÖÃ°Ù·Ö±ÈÁĞ±í
+    // ---------- æ–°å¢ï¼šä½ç½®è½¨è¿¹ ----------
+    // è¯­å¢ƒID â†’ è¯¥tokenåœ¨è¯¥è¯­å¢ƒä¸‹å‡ºç°çš„ä½ç½®ç™¾åˆ†æ¯”åˆ—è¡¨
     unordered_map<int, vector<int>> contextPositionPcts;
 
-    // ---------- ¹¹Ôìº¯Êı ----------
+    // ---------- æ„é€ å‡½æ•° ----------
     Neuron() = default;
     Neuron(int nid, int l) : neuronId(nid), layer(l) {}
-    // ---------- »ñÈ¡´øÆ¥Åä¶ÈµÄ±ßÁĞ±í ----------
+    // ---------- è·å–å¸¦åŒ¹é…åº¦çš„è¾¹åˆ—è¡¨ ----------
 	std::vector<std::pair<int, float>> getEdgesWithMatchScore(int contextID) const;
 
-    // ---------- ÏòÖ¸¶¨Óï¾³Ìí¼ÓÄ¿±êtoken ----------
+    // ---------- å‘æŒ‡å®šè¯­å¢ƒæ·»åŠ ç›®æ ‡token ----------
     void addTargetToContext(int contextID, int targetToken);
-    // ---------- ĞÂÔö£º¼ÇÂ¼Î»ÖÃ ----------
+    // ---------- æ–°å¢ï¼šè®°å½•ä½ç½® ----------
     void recordPosition(int contextID, int positionPercent) {
         if (contextID < 0) return;
-        // Ö±½Ó²åÈë£¬ÔÊĞíÖØ¸´£¨±£ÁôÃ¿´Î³öÏÖµÄ¾ßÌåÎ»ÖÃ£©
+        // ç›´æ¥æ’å…¥ï¼Œå…è®¸é‡å¤ï¼ˆä¿ç•™æ¯æ¬¡å‡ºç°çš„å…·ä½“ä½ç½®ï¼‰
         contextPositionPcts[contextID].push_back(positionPercent);
-        // ÏŞÖÆÁĞ±í³¤¶È£¬·ÀÖ¹ÎŞÏŞÔö³¤
+        // é™åˆ¶åˆ—è¡¨é•¿åº¦ï¼Œé˜²æ­¢æ— é™å¢é•¿
         if (contextPositionPcts[contextID].size() > 200) {
             contextPositionPcts[contextID].erase(
                 contextPositionPcts[contextID].begin(),
@@ -457,7 +457,7 @@ struct Neuron {
         }
     }
 
-    // ---------- ĞÂÔö£º»ñÈ¡Î»ÖÃÊı¾İ ----------
+    // ---------- æ–°å¢ï¼šè·å–ä½ç½®æ•°æ® ----------
     const vector<int>* getPositionsForContext(int contextID) const {
         auto it = contextPositionPcts.find(contextID);
         if (it != contextPositionPcts.end()) {
@@ -466,7 +466,7 @@ struct Neuron {
         return nullptr;
     }
 
-    // ---------- ĞÂÔö£º¼ÆËãÎ»ÖÃÆ¥ÅäµÃ·Ö ----------
+    // ---------- æ–°å¢ï¼šè®¡ç®—ä½ç½®åŒ¹é…å¾—åˆ† ----------
     int calcPositionMatchScore(int contextID, int currentPosPct) const {
         auto it = contextPositionPcts.find(contextID);
         if (it == contextPositionPcts.end()) return 0;
@@ -484,7 +484,7 @@ struct Neuron {
         return score;
     }
 
-    // ---------- Ô­ÓĞ³ÉÔ±º¯Êı£¨ÉùÃ÷£© ----------
+    // ---------- åŸæœ‰æˆå‘˜å‡½æ•°ï¼ˆå£°æ˜ï¼‰ ----------
     void setMode(NeuronMode m, int strength = 5);
     bool canConnect(const Neuron& o) const;
     void integrate(int sig);
@@ -499,21 +499,21 @@ struct Neuron {
     void pruneWeak();
     void updateEdges();
 
-    // ---------- ĞÂÔö£ºÇå¿ÕÎ»ÖÃÊı¾İ£¨ÓÃÓÚÖØÖÃ»òµ÷ÊÔ£© ----------
+    // ---------- æ–°å¢ï¼šæ¸…ç©ºä½ç½®æ•°æ®ï¼ˆç”¨äºé‡ç½®æˆ–è°ƒè¯•ï¼‰ ----------
     void clearPositionData() {
         contextPositionPcts.clear();
     }
-    // ========== ĞÂÔö£ºÔ¤²âÎó²îÏà¹Ø ==========
-    float predictionConfidence = 0.5f;    // Ô¤²âÖÃĞÅ¶È
-    float errorAccumulator = 0.0f;        // ÀÛ»ıÎó²î£¨´¥·¢ÖØÆÀ£©
-    unordered_map<uint64_t, int> contextExpectations;  // Óï¾³¡úÆÚÍûtokenÓ³Éä
-    vector<PredictionRecord> recentPredictions;        // ½üÆÚÔ¤²â¼ÇÂ¼
-    // ========== ĞÂÔö£ºÓï¾³ÆÚÍû¹ÜÀí ==========
+    // ========== æ–°å¢ï¼šé¢„æµ‹è¯¯å·®ç›¸å…³ ==========
+    float predictionConfidence = 0.5f;    // é¢„æµ‹ç½®ä¿¡åº¦
+    float errorAccumulator = 0.0f;        // ç´¯ç§¯è¯¯å·®ï¼ˆè§¦å‘é‡è¯„ï¼‰
+    unordered_map<uint64_t, int> contextExpectations;  // è¯­å¢ƒâ†’æœŸæœ›tokenæ˜ å°„
+    vector<PredictionRecord> recentPredictions;        // è¿‘æœŸé¢„æµ‹è®°å½•
+    // ========== æ–°å¢ï¼šè¯­å¢ƒæœŸæœ›ç®¡ç† ==========
     void addContextExpectation(const ContextSnapshot& snap, int expectedToken) {
         uint64_t h = snap.hash();
         contextExpectations[h] = expectedToken;
         if (contextExpectations.size() > 100) {
-            // ±£Áô×î½üµÄ50¸ö
+            // ä¿ç•™æœ€è¿‘çš„50ä¸ª
             auto it = contextExpectations.begin();
             advance(it, 50);
             contextExpectations.erase(it, contextExpectations.end());
@@ -528,27 +528,155 @@ struct Neuron {
 
 struct EmotionState { EmotionType type=EMO_NORMAL; int intensity=0; };
 
+// ===================== WorldSimulator - å®Œå…¨åŸºäº token ID =====================
 class WorldSimulator {
+private:
+    struct DialogueTurn {
+        vector<int> userInput;
+        vector<int> systemOutput;
+        bool feedbackPositive;
+        int turnIndex;
+    };
+
+    vector<DialogueTurn> history;
+    unordered_map<int, float> userPrefVector;   // token â†’ åå¥½å¼ºåº¦ï¼ˆé¢‘ç‡ç´¯ç§¯ï¼‰
+    unordered_set<int> userPositiveTokens;      // ç”¨æˆ·å–œæ¬¢çš„ tokenï¼ˆä»æ­£åé¦ˆä¸­æŒ–æ˜ï¼‰
+    unordered_set<int> userNegativeTokens;      // ç”¨æˆ·ä¸å–œæ¬¢çš„ tokenï¼ˆä»è´Ÿåé¦ˆä¸­æŒ–æ˜ï¼‰
+
+    float avgTurnLength = 0.0f;
+    int totalTurns = 0;
+    int positiveFeedbackCount = 0;
+    int negativeFeedbackCount = 0;
+
 public:
-    void step(int action) { /* Õ¼Î» */ }
+    // è®°å½•ä¸€æ¬¡å¯¹è¯ï¼Œåé¦ˆå·²çŸ¥
+    void recordTurn(const vector<int>& userInput, const vector<int>& systemOutput, bool feedback) {
+        history.push_back({userInput, systemOutput, feedback, (int)history.size()});
+        totalTurns++;
+        if (feedback) positiveFeedbackCount++;
+        else negativeFeedbackCount++;
+
+        // æ›´æ–°åå¥½å‘é‡ï¼ˆè¯é¢‘ç´¯ç§¯ï¼Œå¸¦è¡°å‡ï¼‰
+        for (int tid : userInput) {
+            userPrefVector[tid] += 1.0f;
+        }
+        // å…¨å±€è¡°å‡ï¼Œè®©æœ€è¿‘åå¥½æ›´æ˜¾è‘—
+        for (auto& kv : userPrefVector) {
+            kv.second *= 0.99f;
+        }
+
+        // æ›´æ–°å¹³å‡è¾“å…¥é•¿åº¦
+        avgTurnLength = (avgTurnLength * (totalTurns - 1) + userInput.size()) / totalTurns;
+
+        // æ ¹æ®åé¦ˆæ ‡è®°ç”¨æˆ·å–œæ¬¢çš„/ä¸å–œæ¬¢çš„ tokenï¼ˆæŒ–æ˜æƒ…æ„Ÿï¼‰
+        if (feedback) {
+            // æ­£åé¦ˆï¼šç”¨æˆ·è¾“å…¥ä¸­çš„ token è§†ä¸ºæ­£é¢
+            for (int tid : userInput) {
+                userPositiveTokens.insert(tid);
+                // åŒæ—¶ä»è´Ÿé¢é›†ä¸­ç§»é™¤ï¼ˆé¿å…å†²çªï¼‰
+                userNegativeTokens.erase(tid);
+            }
+        } else {
+            // è´Ÿåé¦ˆï¼šç”¨æˆ·è¾“å…¥ä¸­çš„ token è§†ä¸ºè´Ÿé¢
+            for (int tid : userInput) {
+                userNegativeTokens.insert(tid);
+                userPositiveTokens.erase(tid);
+            }
+        }
+    }
+
+    // é¢„æµ‹ç”¨æˆ·å¯¹ç»™å®šå€™é€‰è¾“å‡ºçš„æ»¡æ„åº¦ï¼ˆ0~1ï¼‰
+    float predictSatisfaction(const vector<int>& candidateOutput, const vector<int>& context) {
+        if (totalTurns < 2) return 0.5f;
+
+        float score = 0.5f;
+
+        // 1. åå¥½é‡åˆåº¦ï¼ˆå€™é€‰è¾“å‡ºä¸­ token åœ¨åå¥½å‘é‡ä¸­çš„åŠ æƒå¹³å‡ï¼‰
+        float overlap = 0.0f;
+        int candLen = candidateOutput.size();
+        if (candLen > 0) {
+            for (int tid : candidateOutput) {
+                auto it = userPrefVector.find(tid);
+                if (it != userPrefVector.end()) overlap += it->second;
+            }
+            overlap /= candLen;
+            overlap = min(1.0f, overlap / 5.0f); // å‡è®¾æœ€å¤§å¹³å‡åå¥½ä¸º 5
+            score = 0.5f + 0.3f * (overlap - 0.5f);
+        }
+
+        // 2. é•¿åº¦åŒ¹é…åº¦
+        float lenRatio = (float)candidateOutput.size() / (avgTurnLength + 1);
+        float lenMatch = 1.0f - fabs(lenRatio - 1.0f) * 0.5f;
+        lenMatch = max(0.0f, min(1.0f, lenMatch));
+        score = 0.6f * score + 0.4f * lenMatch;
+
+        // 3. æƒ…æ„Ÿä¸€è‡´æ€§ï¼šæ£€æŸ¥å€™é€‰è¾“å‡ºä¸­æ˜¯å¦åŒ…å«ç”¨æˆ·å–œæ¬¢/è®¨åŒçš„ token
+        int posHit = 0, negHit = 0;
+        for (int tid : candidateOutput) {
+            if (userPositiveTokens.count(tid)) posHit++;
+            if (userNegativeTokens.count(tid)) negHit++;
+        }
+        float posRatio = min(1.0f, posHit * 0.2f);   // æ¯å‡ºç°ä¸€ä¸ªæ­£é¢è¯åŠ  0.2ï¼Œä¸Šé™ 1
+        float negRatio = min(1.0f, negHit * 0.3f);   // è´Ÿé¢è¯æƒ©ç½šæ›´é‡
+        float emotScore = 1.0f - negRatio + 0.5f * posRatio;
+        emotScore = max(0.0f, min(1.0f, emotScore));
+        score = 0.7f * score + 0.3f * emotScore;
+
+        // 4. å†å²åé¦ˆå€¾å‘
+        float feedbackBias = (float)positiveFeedbackCount / (totalTurns + 1);
+        score = 0.8f * score + 0.2f * feedbackBias;
+
+        return max(0.0f, min(1.0f, score));
+    }
+
+    // åäº‹å®é¢„æ¼”ï¼šå¯¹å€™é€‰ token åˆ—è¡¨ï¼Œè¿”å› (token, æ»¡æ„åº¦åˆ†æ•°)
+    vector<pair<int, float>> simulateCandidates(const vector<int>& candidateTokens,
+                                                const vector<int>& context) {
+        vector<pair<int, float>> results;
+        for (int tid : candidateTokens) {
+            vector<int> fullOutput = context;
+            fullOutput.push_back(tid);
+            float sat = predictSatisfaction(fullOutput, context);
+            results.emplace_back(tid, sat);
+        }
+        return results;
+    }
+
+    bool hasData() const { return totalTurns > 1; }
+    string getSummary() const {
+        stringstream ss;
+        ss << "æ€»è½®æ¬¡:" << totalTurns
+           << " ç§¯æç‡:" << (totalTurns ? (100 * positiveFeedbackCount / totalTurns) : 0) << "%"
+           << " å¹³å‡é•¿åº¦:" << avgTurnLength
+           << " åå¥½è¯æ•°:" << userPrefVector.size()
+           << " æ­£é¢tokenæ•°:" << userPositiveTokens.size()
+           << " è´Ÿé¢tokenæ•°:" << userNegativeTokens.size();
+        return ss.str();
+    }
+
+    // ä¿ç•™åŸæœ‰å ä½å‡½æ•°ï¼ˆå…¼å®¹æ€§ï¼‰
+    void step(int action) {}
     vector<float> getObservation() { return {}; }
     int getStateHash() { return 0; }
 };
-// ===================== GBK ? UTF-8 ±àÂë×ª»» =====================
 
-// GBK ¡ú UTF-8
+// å…¨å±€ç”¨æˆ·æ¨¡å‹ï¼ˆç±»ä¼¼ Loggerï¼‰
+WorldSimulator userModel;
+// ===================== GBK ? UTF-8 ç¼–ç è½¬æ¢ =====================
+
+// GBK â†’ UTF-8
 string gbkToUtf8(const string& gbk) {
     if (gbk.empty()) return "";
 
-    // 1. GBK ¡ú UTF-16 (¿í×Ö·û)
+    // 1. GBK â†’ UTF-16 (å®½å­—ç¬¦)
     int lenW = MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), -1, NULL, 0);
     if (lenW == 0) return "";
     wstring wstr(lenW, L'\0');
     MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), -1, &wstr[0], lenW);
-    // È¥µôÄ©Î²µÄ '\0'
+    // å»æ‰æœ«å°¾çš„ '\0'
     while (!wstr.empty() && wstr.back() == L'\0') wstr.pop_back();
 
-    // 2. UTF-16 ¡ú UTF-8
+    // 2. UTF-16 â†’ UTF-8
     int lenU8 = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
     if (lenU8 == 0) return "";
     string utf8(lenU8, '\0');
@@ -558,18 +686,18 @@ string gbkToUtf8(const string& gbk) {
     return utf8;
 }
 
-// UTF-8 ¡ú GBK
+// UTF-8 â†’ GBK
 string utf8ToGbk(const string& utf8) {
     if (utf8.empty()) return "";
 
-    // 1. UTF-8 ¡ú UTF-16
+    // 1. UTF-8 â†’ UTF-16
     int lenW = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, NULL, 0);
     if (lenW == 0) return "";
     wstring wstr(lenW, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, &wstr[0], lenW);
     while (!wstr.empty() && wstr.back() == L'\0') wstr.pop_back();
 
-    // 2. UTF-16 ¡ú GBK
+    // 2. UTF-16 â†’ GBK
     int lenGBK = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
     if (lenGBK == 0) return "";
     string gbk(lenGBK, '\0');
@@ -580,24 +708,24 @@ string utf8ToGbk(const string& utf8) {
 }
 
 // ============================================================
-//  WordSegmenter - °´´ÊÇĞ·Ö£¬GBK ±àÂë
+//  WordSegmenter - æŒ‰è¯åˆ‡åˆ†ï¼ŒGBK ç¼–ç 
 // ============================================================
 
 class WordSegmenter {
 private:
-    // ´ÊÆµ´Êµä£º´Ê ¡ú ´ÊÆµ
+    // è¯é¢‘è¯å…¸ï¼šè¯ â†’ è¯é¢‘
     std::unordered_map<std::string, int> dict;
-    int maxWordLen = 0;  // ´ÊµäÖĞ×î³¤´ÊµÄ³¤¶È£¨°´×Ö·ûÊı£©
+    int maxWordLen = 0;  // è¯å…¸ä¸­æœ€é•¿è¯çš„é•¿åº¦ï¼ˆæŒ‰å­—ç¬¦æ•°ï¼‰
     bool loaded = false;
 
     bool loadDict(const string& dictPath) {
 	    ifstream f(dictPath);
 	    if (!f.is_open()) {
-	        cerr << "[·Ö´Ê] ÎŞ·¨´ò¿ª´Êµä: " << dictPath << endl;
+	        cerr << "[åˆ†è¯] æ— æ³•æ‰“å¼€è¯å…¸: " << dictPath << endl;
 	        return false;
 	    }
 	
-	    // ÏÈÍ³¼Æ´ÊÌõÊı
+	    // å…ˆç»Ÿè®¡è¯æ¡æ•°
 	    int lineCount = 0;
 	    string line;
 	    while (getline(f, line)) {
@@ -606,9 +734,9 @@ private:
 	    f.clear();
 	    f.seekg(0, ios::beg);
 	
-	    // Ô¤·ÖÅä¿Õ¼ä£¬±ÜÃâ·´¸´ rehash
+	    // é¢„åˆ†é…ç©ºé—´ï¼Œé¿å…åå¤ rehash
 	    dict.reserve(lineCount);
-	    dict.max_load_factor(0.7);  // ½µµÍ¸ºÔØÒò×Ó£¬¼õÉÙ³åÍ»
+	    dict.max_load_factor(0.7);  // é™ä½è´Ÿè½½å› å­ï¼Œå‡å°‘å†²çª
 	
 	    maxWordLen = 0;
 	    while (getline(f, line)) {
@@ -620,7 +748,7 @@ private:
 	        string utf8Word = line.substr(0, space1);
 	        if (utf8Word.empty()) continue;
 	
-	        // UTF-8 ¡ú GBK
+	        // UTF-8 â†’ GBK
 	        string gbkWord = utf8ToGbk(utf8Word);
 	
 	        int freq = 1;
@@ -636,16 +764,16 @@ private:
 	    }
 	
 	    loaded = true;
-	    cout << "[·Ö´Ê] ¼ÓÔØÍê³É£¬´ÊÌõÊı: " << dict.size() << "£¬×î´ó´Ê³¤: " << maxWordLen << " ×Ö½Ú" << endl;
+	    cout << "[åˆ†è¯] åŠ è½½å®Œæˆï¼Œè¯æ¡æ•°: " << dict.size() << "ï¼Œæœ€å¤§è¯é•¿: " << maxWordLen << " å­—èŠ‚" << endl;
 	    return true;
 	}
 
-    // ¼ì²éÒ»¸ö´ÊÊÇ·ñÔÚ´ÊµäÖĞ
+    // æ£€æŸ¥ä¸€ä¸ªè¯æ˜¯å¦åœ¨è¯å…¸ä¸­
     bool inDict(const std::string& word) const {
         return dict.find(word) != dict.end();
     }
 
-    // ÕıÏò×î´óÆ¥Åä£¨FMM£©
+    // æ­£å‘æœ€å¤§åŒ¹é…ï¼ˆFMMï¼‰
     std::vector<std::string> fmm(const std::string& text) const {
         std::vector<std::string> result;
         int pos = 0;
@@ -655,37 +783,37 @@ private:
             int len = std::min(maxWordLen, n - pos);
             std::string word = text.substr(pos, len);
 
-            // Èç¹ûÕû¶Î²»ÔÚ´ÊµäÖĞ£¬³¢ÊÔËõ¶Ì
+            // å¦‚æœæ•´æ®µä¸åœ¨è¯å…¸ä¸­ï¼Œå°è¯•ç¼©çŸ­
             while (len > 1 && !inDict(word)) {
-                // ¼ì²éÊÇ·ñÊÇµ¥×Ö´Ê£¨Èç¹ûÊÇµ¥×Ö£¬Ö±½ÓÇĞ£©
+                // æ£€æŸ¥æ˜¯å¦æ˜¯å•å­—è¯ï¼ˆå¦‚æœæ˜¯å•å­—ï¼Œç›´æ¥åˆ‡ï¼‰
                 if (len == 1) break;
-                // ¼ì²éÇ°Ò»¸ö×Ö·ûÊÇ·ñÔÚ GBK ·¶Î§ÄÚ
+                // æ£€æŸ¥å‰ä¸€ä¸ªå­—ç¬¦æ˜¯å¦åœ¨ GBK èŒƒå›´å†…
                 len -= 1;
-                // Èç¹û len Ö¸Ïò GBK Ë«×Ö½ÚµÄÖĞ¼ä£¬Ìø¹ı
+                // å¦‚æœ len æŒ‡å‘ GBK åŒå­—èŠ‚çš„ä¸­é—´ï¼Œè·³è¿‡
                 while (len > 0 && ((unsigned char)text[pos + len - 1] >= 0x81 && (unsigned char)text[pos + len - 1] <= 0xFE)) {
                     len -= 1;
                 }
                 word = text.substr(pos, len);
             }
 
-            // Èç¹û»¹ÊÇ²»ÔÚ´ÊµäÖĞ£¬°´µ¥×ÖÇĞ·Ö£¨µ«ÒªÕıÈ·´¦Àí GBK Ë«×Ö½Ú£©
+            // å¦‚æœè¿˜æ˜¯ä¸åœ¨è¯å…¸ä¸­ï¼ŒæŒ‰å•å­—åˆ‡åˆ†ï¼ˆä½†è¦æ­£ç¡®å¤„ç† GBK åŒå­—èŠ‚ï¼‰
             if (!inDict(word)) {
-                // ¼ì²éÊÇ·ñÊÇ GBK Ë«×Ö½Ú×Ö·û
+                // æ£€æŸ¥æ˜¯å¦æ˜¯ GBK åŒå­—èŠ‚å­—ç¬¦
                 unsigned char c = (unsigned char)text[pos];
                 if (c >= 0x81 && c <= 0xFE) {
-                    // Ë«×Ö½Ú
+                    // åŒå­—èŠ‚
                     if (pos + 1 < n) {
                         word = text.substr(pos, 2);
                         result.push_back(word);
                         pos += 2;
                     } else {
-                        // µ¥×Ö½Ú
+                        // å•å­—èŠ‚
                         word = text.substr(pos, 1);
                         result.push_back(word);
                         pos += 1;
                     }
                 } else {
-                    // µ¥×Ö½Ú ASCII
+                    // å•å­—èŠ‚ ASCII
                     word = text.substr(pos, 1);
                     result.push_back(word);
                     pos += 1;
@@ -699,7 +827,7 @@ private:
         return result;
     }
 
-    // ·´Ïò×î´óÆ¥Åä£¨BMM£©
+    // åå‘æœ€å¤§åŒ¹é…ï¼ˆBMMï¼‰
     std::vector<std::string> bmm(const std::string& text) const {
         std::vector<std::string> result;
         int pos = text.size();
@@ -711,7 +839,7 @@ private:
             while (len > 1 && !inDict(word)) {
                 if (len == 1) break;
                 len -= 1;
-                // ±ÜÃâ½Ø¶Ï GBK Ë«×Ö½Ú
+                // é¿å…æˆªæ–­ GBK åŒå­—èŠ‚
                 while (len > 0 && ((unsigned char)text[pos - len] >= 0x81 && (unsigned char)text[pos - len] <= 0xFE)) {
                     len -= 1;
                 }
@@ -720,7 +848,7 @@ private:
             }
 
             if (!inDict(word)) {
-                // °´µ¥×Ö´¦Àí
+                // æŒ‰å•å­—å¤„ç†
                 unsigned char c = (unsigned char)text[pos - 1];
                 if (c >= 0x81 && c <= 0xFE) {
                     if (pos - 2 >= 0) {
@@ -749,29 +877,29 @@ private:
 public:
     WordSegmenter() {}
 
-    // ¼ÓÔØ´Êµä
+    // åŠ è½½è¯å…¸
     bool load(const std::string& dictPath) {
         return loadDict(dictPath);
     }
 
     bool isLoaded() const { return loaded; }
 
-    // ·Ö´ÊÖ÷º¯Êı£¨Ë«Ïò×î´óÆ¥Åä£¬È¡¸üÓÅ½á¹û£©
+    // åˆ†è¯ä¸»å‡½æ•°ï¼ˆåŒå‘æœ€å¤§åŒ¹é…ï¼Œå–æ›´ä¼˜ç»“æœï¼‰
     std::vector<std::string> cut(const std::string& text) {
         if (!loaded) {
-            std::cerr << "[´íÎó] ´ÊµäÉĞÎ´¼ÓÔØ" << std::endl;
+            std::cerr << "[é”™è¯¯] è¯å…¸å°šæœªåŠ è½½" << std::endl;
             return {};
         }
 
         if (text.empty()) return {};
 
-        // ÕıÏò×î´óÆ¥Åä
+        // æ­£å‘æœ€å¤§åŒ¹é…
         std::vector<std::string> fmmResult = fmm(text);
 
-        // ·´Ïò×î´óÆ¥Åä
+        // åå‘æœ€å¤§åŒ¹é…
         std::vector<std::string> bmmResult = bmm(text);
 
-        // Ñ¡Ôñ½á¹û¸üÓÅµÄ£¨´ÊÊı¸üÉÙ£¬´Ê³¤¸ü³¤£©
+        // é€‰æ‹©ç»“æœæ›´ä¼˜çš„ï¼ˆè¯æ•°æ›´å°‘ï¼Œè¯é•¿æ›´é•¿ï¼‰
         if (fmmResult.size() <= bmmResult.size()) {
             return fmmResult;
         } else {
@@ -779,22 +907,22 @@ public:
         }
     }
 
-    // »ñÈ¡´Êµä´óĞ¡
+    // è·å–è¯å…¸å¤§å°
     size_t dictSize() const { return dict.size(); }
     int getMaxWordLen() const { return maxWordLen; }
 };
 /*
 // ============================================================
-//  PosDictLoader - ¼ÓÔØ pos_dict ÎÄ¼ş£¬Ìá¹©´ÊĞÔ²éÑ¯
+//  PosDictLoader - åŠ è½½ pos_dict æ–‡ä»¶ï¼Œæä¾›è¯æ€§æŸ¥è¯¢
 // ============================================================
 
 class PosDictLoader {
 private:
-    // ×Ö ¡ú vector<{×´Ì¬, ´ÊĞÔ}>
+    // å­— â†’ vector<{çŠ¶æ€, è¯æ€§}>
     std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> dict;
     bool loaded = false;
 
-    // ×´Ì¬Ó³Éäµ½ AutoPosType
+    // çŠ¶æ€æ˜ å°„åˆ° AutoPosType
     AutoPosType mapStateToPos(const std::string& state) {
         if (state == "v" || state == "vd" || state == "vi" || state == "vl" || state == "vg") return POS_VERB;
         if (state == "n" || state == "nr" || state == "ns" || state == "nt" || state == "nz" || state == "vn") return POS_NOUN;
@@ -812,11 +940,11 @@ private:
     }
 
 public:
-    // ¼ÓÔØ pos_dict ÎÄ¼ş£¨GBK ±àÂë£©
+    // åŠ è½½ pos_dict æ–‡ä»¶ï¼ˆGBK ç¼–ç ï¼‰
     bool load(const string& filename) {
 	    ifstream f(filename);
 	    if (!f.is_open()) {
-	        cerr << "[PosDict] ÎŞ·¨´ò¿ªÎÄ¼ş: " << filename << endl;
+	        cerr << "[PosDict] æ— æ³•æ‰“å¼€æ–‡ä»¶: " << filename << endl;
 	        return false;
 	    }
 	
@@ -845,7 +973,7 @@ public:
 	                if (comma != string::npos) {
 	                    string tag = state.substr(0, comma);
 	                    string posTag = state.substr(comma + 1);
-	                    // È¥¿Õ¸ñ
+	                    // å»ç©ºæ ¼
 	                    tag.erase(0, tag.find_first_not_of(" \t"));
 	                    tag.erase(tag.find_last_not_of(" \t") + 1);
 	                    posTag.erase(0, posTag.find_first_not_of(" \t"));
@@ -862,11 +990,11 @@ public:
 	    }
 	
 	    loaded = true;
-	    cout << "[PosDict] ¼ÓÔØÍê³É£¬¹² " << dict.size() << " ¸öÌõÄ¿" << endl;
+	    cout << "[PosDict] åŠ è½½å®Œæˆï¼Œå…± " << dict.size() << " ä¸ªæ¡ç›®" << endl;
 	    return true;
 	}
 
-    // ²éÑ¯Ò»¸ö´ÊµÄ´ÊĞÔ£¨È¡µÚÒ»¸ö³öÏÖµÄ´ÊĞÔ£©
+    // æŸ¥è¯¢ä¸€ä¸ªè¯çš„è¯æ€§ï¼ˆå–ç¬¬ä¸€ä¸ªå‡ºç°çš„è¯æ€§ï¼‰
     AutoPosType getPos(const std::string& word) {
         auto it = dict.find(word);
         if (it == dict.end()) return POS_UNKNOWN;
@@ -874,7 +1002,7 @@ public:
         const auto& states = it->second;
         if (states.empty()) return POS_UNKNOWN;
 
-        // ÓÅÏÈÈ¡ E »ò S ×´Ì¬£¨¸ü¿É¿¿£©
+        // ä¼˜å…ˆå– E æˆ– S çŠ¶æ€ï¼ˆæ›´å¯é ï¼‰
         for (const auto& state : states) {
             const std::string& tag = state.first;
             if (tag == "E" || tag == "S") {
@@ -891,17 +1019,17 @@ public:
 
 
 // ============================================================
-//  PosTaggerWrapper - Íâ²¿´ÊĞÔ±ê×¢°ü×°Æ÷£¨¶¯Ì¬¼ÓÔØ°æ£©
+//  PosTaggerWrapper - å¤–éƒ¨è¯æ€§æ ‡æ³¨åŒ…è£…å™¨ï¼ˆåŠ¨æ€åŠ è½½ç‰ˆï¼‰
 // ============================================================
 
 class PosTaggerWrapper {
 private:
-    cppjieba::Jieba* jieba = nullptr;  // Ö¸Õë£¬ÑÓ³Ù³õÊ¼»¯
+    cppjieba::Jieba* jieba = nullptr;  // æŒ‡é’ˆï¼Œå»¶è¿Ÿåˆå§‹åŒ–
     std::unordered_map<std::string, AutoPosType> tagMap;
     bool initialized = false;
 
     void buildTagMap() {
-        // Ãû´ÊÏµÁĞ
+        // åè¯ç³»åˆ—
         tagMap["n"]  = POS_NOUN;
         tagMap["nr"] = POS_NOUN;
         tagMap["ns"] = POS_NOUN;
@@ -909,73 +1037,73 @@ private:
         tagMap["nz"] = POS_NOUN;
         tagMap["vn"] = POS_NOUN;
 
-        // ¶¯´ÊÏµÁĞ
+        // åŠ¨è¯ç³»åˆ—
         tagMap["v"]  = POS_VERB;
         tagMap["vd"] = POS_VERB;
         tagMap["vi"] = POS_VERB;
         tagMap["vl"] = POS_VERB;
         tagMap["vg"] = POS_VERB;
 
-        // ĞÎÈİ´ÊÏµÁĞ
+        // å½¢å®¹è¯ç³»åˆ—
         tagMap["a"]  = POS_ADJ;
         tagMap["ad"] = POS_ADJ;
 
-        // ´ú´Ê
+        // ä»£è¯
         tagMap["r"]  = POS_PRON;
         tagMap["rr"] = POS_PRON;
         tagMap["rz"] = POS_PRON;
 
-        // ½é´Ê
+        // ä»‹è¯
         tagMap["p"]  = POS_PREP;
 
-        // Á¬´Ê
+        // è¿è¯
         tagMap["c"]  = POS_CONJ;
 
-        // Öú´Ê
+        // åŠ©è¯
         tagMap["u"]  = POS_AUX;
         tagMap["ul"] = POS_AUX;
         tagMap["uz"] = POS_AUX;
 
-        // Êı´Ê
+        // æ•°è¯
         tagMap["m"]  = POS_NUM;
 
-        // Á¿´Ê
+        // é‡è¯
         tagMap["q"]  = POS_QUANT;
 
-        // ¸±´Ê
+        // å‰¯è¯
         tagMap["d"]  = POS_ADV;
 
-        // ±êµã
+        // æ ‡ç‚¹
         tagMap["x"]  = POS_PUNCT;
         tagMap["w"]  = POS_PUNCT;
         tagMap["wp"] = POS_PUNCT;
         tagMap["ws"] = POS_PUNCT;
         tagMap["wu"] = POS_PUNCT;
 
-        // Ì¾´Ê
+        // å¹è¯
         tagMap["e"]  = POS_INTERJ;
 
-        // Î´Öª
+        // æœªçŸ¥
         tagMap["unk"] = POS_UNKNOWN;
     }
 
     AutoPosType mapTagToEnum(const std::string& tag) const {
         auto it = tagMap.find(tag);
         if (it != tagMap.end()) return it->second;
-        // Ä£ºıÆ¥Åä£ºÈç¹û±êÇ©ÒÔÒÑÖªÇ°×º¿ªÍ·
+        // æ¨¡ç³ŠåŒ¹é…ï¼šå¦‚æœæ ‡ç­¾ä»¥å·²çŸ¥å‰ç¼€å¼€å¤´
         for (const auto& entry : tagMap) {
             if (tag.find(entry.first) == 0) return entry.second;
         }
         return POS_UNKNOWN;
     }
 
-    // ³õÊ¼»¯ Jieba£¨Ö»ÔÚµÚÒ»´Îµ÷ÓÃÊ±Ö´ĞĞ£©
+    // åˆå§‹åŒ– Jiebaï¼ˆåªåœ¨ç¬¬ä¸€æ¬¡è°ƒç”¨æ—¶æ‰§è¡Œï¼‰
     void ensureInitialized() {
         if (initialized) return;
         
-        std::cout << "[Jieba] ÕıÔÚ¼ÓÔØ´Êµä..." << std::endl;
+        std::cout << "[Jieba] æ­£åœ¨åŠ è½½è¯å…¸..." << std::endl;
         
-        // ¶¯Ì¬´´½¨ Jieba ¶ÔÏó
+        // åŠ¨æ€åˆ›å»º Jieba å¯¹è±¡
         jieba = new cppjieba::Jieba(
             "cppjieba/dict/jieba.dict.utf8",
             "cppjieba/dict/hmm_model.utf8",
@@ -987,7 +1115,7 @@ private:
         buildTagMap();
         initialized = true;
         
-        std::cout << "[Jieba] ¼ÓÔØÍê³É" << std::endl;
+        std::cout << "[Jieba] åŠ è½½å®Œæˆ" << std::endl;
     }
 
 public:
@@ -1000,26 +1128,26 @@ public:
         }
     }
 
-    // ¶ÔÒ»¶ÎÎÄ±¾½øĞĞ·Ö´Ê²¢±ê×¢´ÊĞÔ£¨GBK ÊäÈë£©
+    // å¯¹ä¸€æ®µæ–‡æœ¬è¿›è¡Œåˆ†è¯å¹¶æ ‡æ³¨è¯æ€§ï¼ˆGBK è¾“å…¥ï¼‰
     std::vector<std::pair<std::string, std::string>> tag(const std::string& text_gbk) {
         std::vector<std::pair<std::string, std::string>> results_gbk;
 
         if (text_gbk.empty()) return results_gbk;
 
-        // ÀÁ¼ÓÔØ£ºµÚÒ»´Îµ÷ÓÃÊ±²Å³õÊ¼»¯
+        // æ‡’åŠ è½½ï¼šç¬¬ä¸€æ¬¡è°ƒç”¨æ—¶æ‰åˆå§‹åŒ–
         ensureInitialized();
 
         if (jieba == nullptr) return results_gbk;
 
-        // GBK ¡ú UTF-8
+        // GBK â†’ UTF-8
         std::string text_utf8 = gbkToUtf8(text_gbk);
         if (text_utf8.empty()) return results_gbk;
 
-        // µ÷ÓÃ Jieba ·Ö´Ê
+        // è°ƒç”¨ Jieba åˆ†è¯
         std::vector<std::pair<std::string, std::string>> results_utf8;
         jieba->Tag(text_utf8, results_utf8);
 
-        // ½«½á¹ûÖĞµÄ´Ê´Ó UTF-8 ×ª»Ø GBK
+        // å°†ç»“æœä¸­çš„è¯ä» UTF-8 è½¬å› GBK
         for (const auto& pair : results_utf8) {
             std::string word_gbk = utf8ToGbk(pair.first);
             results_gbk.push_back({word_gbk, pair.second});
@@ -1028,7 +1156,7 @@ public:
         return results_gbk;
     }
 
-    // »ñÈ¡Õû¶ÎÎÄ±¾µÄ token ¡ú ´ÊĞÔÓ³Éä±í
+    // è·å–æ•´æ®µæ–‡æœ¬çš„ token â†’ è¯æ€§æ˜ å°„è¡¨
     std::unordered_map<std::string, AutoPosType> getPosMap(const std::string& text_gbk) {
         std::unordered_map<std::string, AutoPosType> posMap;
         auto tagged = tag(text_gbk);
@@ -1038,21 +1166,21 @@ public:
         return posMap;
     }
 
-    // ¼ì²éÊÇ·ñÒÑ¾­³õÊ¼»¯
+    // æ£€æŸ¥æ˜¯å¦å·²ç»åˆå§‹åŒ–
     bool isInitialized() const { return initialized; }
 };
 
 // ===================== TextTokenizer =====================
 // ===================== TextTokenizer =====================
 struct TextTokenizer {
-    // ---------- Ô­ÓĞ³ÉÔ± ----------
+    // ---------- åŸæœ‰æˆå‘˜ ----------
     vector<string> vocabList;
     vector<vector<int>> conceptSeq;
     vector<vector<int>> conceptContent;
     vector<pair<string,vector<int>>> knowledgeVec;
     unordered_set<string> radicalPool;
-    unordered_set<string> symbolFilter={"¡£","£¬","£¿","£¡"," ","\n","\r","¡¢","£º","£»"};
-    unordered_set<string> numSet={"0","1","2","3","4","5","6","7","8","9","°Ù","Ç§","Íò","ÒÚ"};
+    unordered_set<string> symbolFilter={"ã€‚","ï¼Œ","ï¼Ÿ","ï¼"," ","\n","\r","ã€","ï¼š","ï¼›"};
+    unordered_set<string> numSet={"0","1","2","3","4","5","6","7","8","9","ç™¾","åƒ","ä¸‡","äº¿"};
     int nextConceptId=10000;
     unordered_map<int,vector<float>> tokenEmbedding;
     unordered_map<pair<int,int>,float,pair_hash> pmiMatrix;
@@ -1068,16 +1196,16 @@ struct TextTokenizer {
     vector<pair<uint64_t, int>> posSkeletonTemplates;
     unordered_map<int, vector<int>> phrasePrefix1;
     unordered_map<uint64_t, vector<int>> phrasePrefix2;
-	// ========== ĞÂÔö£ºÍâ²¿´ÊĞÔ±ê×¢Æ÷ ==========
+	// ========== æ–°å¢ï¼šå¤–éƒ¨è¯æ€§æ ‡æ³¨å™¨ ==========
 	PosTaggerWrapper posTagger;
 	
-	// ========== ĞÂÔö£º´ÊĞÔ»º´æ£¨token ID ¡ú ´ÊĞÔÃ¶¾Ù£© ==========
+	// ========== æ–°å¢ï¼šè¯æ€§ç¼“å­˜ï¼ˆtoken ID â†’ è¯æ€§æšä¸¾ï¼‰ ==========
 	unordered_map<int, AutoPosType> posCache;
 	
-	// ========== ĞÂÔö£º»º´æ×´Ì¬ ==========
+	// ========== æ–°å¢ï¼šç¼“å­˜çŠ¶æ€ ==========
 	bool posCacheValid = false;
 	string cachedText;
-    // ---------- ¾²Ì¬º¯Êı ----------
+    // ---------- é™æ€å‡½æ•° ----------
     static uint64_t encodePosSeq(const vector<AutoPosType>& seq) {
         uint64_t code = 0;
         for (size_t i = 0; i < seq.size() && i < 6; ++i) {
@@ -1095,7 +1223,7 @@ struct TextTokenizer {
         return res;
     }
 
-    // ========== ĞÂÔö£º·ÖÎöÒ»¶ÎÎÄ±¾£¬Ìî³ä´ÊĞÔ»º´æ ==========
+    // ========== æ–°å¢ï¼šåˆ†æä¸€æ®µæ–‡æœ¬ï¼Œå¡«å……è¯æ€§ç¼“å­˜ ==========
 	void analyzeText(const string& text) {
 	    if (text.empty()) {
 	        posCache.clear();
@@ -1103,15 +1231,15 @@ struct TextTokenizer {
 	        return;
 	    }
 	
-	    // Èç¹ûÎÄ±¾Ã»±ä£¬¸´ÓÃ»º´æ
+	    // å¦‚æœæ–‡æœ¬æ²¡å˜ï¼Œå¤ç”¨ç¼“å­˜
 	    if (posCacheValid && cachedText == text) {
 	        return;
 	    }
 	
-	    // µ÷ÓÃÍâ²¿¿â½øĞĞ´ÊĞÔ±ê×¢
+	    // è°ƒç”¨å¤–éƒ¨åº“è¿›è¡Œè¯æ€§æ ‡æ³¨
 	    auto posMap = posTagger.getPosMap(text);
 	
-	    // Çå¿Õ»º´æ²¢ÖØĞÂÌî³ä
+	    // æ¸…ç©ºç¼“å­˜å¹¶é‡æ–°å¡«å……
 	    posCache.clear();
 	    for (const auto& pair : posMap) {
 	        const string& word = pair.first;
@@ -1125,7 +1253,7 @@ struct TextTokenizer {
 	    posCacheValid = true;
 	    cachedText = text;
 	}
-	// ========== ĞÂÔö£º°²È«µÄ±àÂëº¯Êı£¨´øµİ¹é±£»¤£© ==========
+	// ========== æ–°å¢ï¼šå®‰å…¨çš„ç¼–ç å‡½æ•°ï¼ˆå¸¦é€’å½’ä¿æŠ¤ï¼‰ ==========
     vector<int> encode_direct(const string& text) {
         vector<int> seq{1};
         size_t i = 0;
@@ -1170,35 +1298,35 @@ struct TextTokenizer {
     }
 
     // ============================================================
-    //  ĞÂÔö£ºÖ±½Ó´´½¨¸ÅÄî£¨²»±éÀú knowledgeVec£©
+    //  æ–°å¢ï¼šç›´æ¥åˆ›å»ºæ¦‚å¿µï¼ˆä¸éå† knowledgeVecï¼‰
     // ============================================================
     int createConceptDirect(const vector<int>& tokens) {
-        // ¼ì²éÊÇ·ñÒÑ´æÔÚ£¨Ö»±éÀú conceptSeq£©
+        // æ£€æŸ¥æ˜¯å¦å·²å­˜åœ¨ï¼ˆåªéå† conceptSeqï¼‰
         for(int i = 0; i < (int)conceptSeq.size(); ++i) {
             if(conceptSeq[i] == tokens) {
                 return i + nextConceptId;
             }
         }
-        // ´´½¨ĞÂ¸ÅÄî
+        // åˆ›å»ºæ–°æ¦‚å¿µ
         conceptSeq.push_back(tokens);
         conceptContent.emplace_back();
         return nextConceptId + (int)conceptSeq.size() - 1;
     }
 
     // ============================================================
-    //  Ìæ»»£ºloadKnowledge£¨°²È«°æ±¾£©
+    //  æ›¿æ¢ï¼šloadKnowledgeï¼ˆå®‰å…¨ç‰ˆæœ¬ï¼‰
     // ============================================================
     void loadKnowledge() {
-        cout << "[ÖªÊ¶¿â] ¿ªÊ¼¼ÓÔØ..." << endl;
+        cout << "[çŸ¥è¯†åº“] å¼€å§‹åŠ è½½..." << endl;
         cout.flush();
         
         ifstream f(KNOWLEDGE_FILE);
         if(!f.is_open()) {
-            cout << "[ÖªÊ¶¿â] ÎÄ¼ş²»´æÔÚ£¬Ìø¹ı" << endl;
+            cout << "[çŸ¥è¯†åº“] æ–‡ä»¶ä¸å­˜åœ¨ï¼Œè·³è¿‡" << endl;
             return;
         }
         
-        // µÚÒ»²½£º¶ÁÈ¡ËùÓĞÌõÄ¿
+        // ç¬¬ä¸€æ­¥ï¼šè¯»å–æ‰€æœ‰æ¡ç›®
         vector<pair<string, string>> entries;
         string line_;
         int lineNum = 0;
@@ -1207,34 +1335,34 @@ struct TextTokenizer {
             lineNum++;
             if(line_.empty()) continue;
             string line = utf8ToGbk(line_);
-            // È¥³ıÊ×Î²¿Õ°×
+            // å»é™¤é¦–å°¾ç©ºç™½
             size_t start = line.find_first_not_of(" \t\r\n");
             if(start == string::npos) continue;
             line = line.substr(start);
             size_t end = line.find_last_not_of(" \t\r\n");
             if(end != string::npos) line = line.substr(0, end + 1);
             
-            // ²éÕÒ·Ö¸ô·û£¨Ö§³ÖÓ¢ÎÄÃ°ºÅºÍÖĞÎÄÃ°ºÅ£©
+            // æŸ¥æ‰¾åˆ†éš”ç¬¦ï¼ˆæ”¯æŒè‹±æ–‡å†’å·å’Œä¸­æ–‡å†’å·ï¼‰
             size_t col1 = line.find(':');
-            size_t col2 = line.find("£º");
+            size_t col2 = line.find("ï¼š");
             size_t col = (col1 != string::npos) ? col1 : col2;
             
             if(col == string::npos) {
-                cout << "[ÖªÊ¶¿â] ¾¯¸æ£ºµÚ " << lineNum << " ĞĞ¸ñÊ½´íÎó£¬Ìø¹ı" << endl;
+                cout << "[çŸ¥è¯†åº“] è­¦å‘Šï¼šç¬¬ " << lineNum << " è¡Œæ ¼å¼é”™è¯¯ï¼Œè·³è¿‡" << endl;
                 continue;
             }
             
             string key = line.substr(0, col);
             string val = line.substr(col + 1);
             
-            // È¥³ı¼üÖµµÄÊ×Î²¿Õ°×
+            // å»é™¤é”®å€¼çš„é¦–å°¾ç©ºç™½
             key.erase(0, key.find_first_not_of(" \t\r\n"));
             key.erase(key.find_last_not_of(" \t\r\n") + 1);
             val.erase(0, val.find_first_not_of(" \t\r\n"));
             val.erase(val.find_last_not_of(" \t\r\n") + 1);
             
             if(key.empty() || val.empty()) {
-                cout << "[ÖªÊ¶¿â] ¾¯¸æ£ºµÚ " << lineNum << " ĞĞ¼ü»òÖµÎª¿Õ£¬Ìø¹ı" << endl;
+                cout << "[çŸ¥è¯†åº“] è­¦å‘Šï¼šç¬¬ " << lineNum << " è¡Œé”®æˆ–å€¼ä¸ºç©ºï¼Œè·³è¿‡" << endl;
                 continue;
             }
             
@@ -1242,9 +1370,9 @@ struct TextTokenizer {
         }
         f.close();
         
-        cout << "[ÖªÊ¶¿â] ¶ÁÈ¡Íê³É£¬¹² " << entries.size() << " ÌõÖªÊ¶" << endl;
+        cout << "[çŸ¥è¯†åº“] è¯»å–å®Œæˆï¼Œå…± " << entries.size() << " æ¡çŸ¥è¯†" << endl;
         
-        // µÚ¶ş²½£ºÏÈ¼ì²éÄÄĞ©ÊÇĞÂµÄ
+        // ç¬¬äºŒæ­¥ï¼šå…ˆæ£€æŸ¥å“ªäº›æ˜¯æ–°çš„
         vector<pair<string, string>> newEntries;
         for(auto& entry : entries) {
             bool exists = false;
@@ -1259,9 +1387,9 @@ struct TextTokenizer {
             }
         }
         
-        cout << "[ÖªÊ¶¿â] ĞÂÔö " << newEntries.size() << " ÌõÖªÊ¶" << endl;
+        cout << "[çŸ¥è¯†åº“] æ–°å¢ " << newEntries.size() << " æ¡çŸ¥è¯†" << endl;
         
-        // µÚÈı²½£ºÏÈ¹¹½¨´Ê±í£¨±ÜÃâÔÚ±àÂëÊ±ĞŞ¸ÄÈİÆ÷£©
+        // ç¬¬ä¸‰æ­¥ï¼šå…ˆæ„å»ºè¯è¡¨ï¼ˆé¿å…åœ¨ç¼–ç æ—¶ä¿®æ”¹å®¹å™¨ï¼‰
         for(auto& entry : newEntries) {
             auto chars1 = splitGBK(entry.first);
             auto chars2 = splitGBK(entry.second);
@@ -1290,20 +1418,20 @@ struct TextTokenizer {
             }
         }
         
-        // µÚËÄ²½£º°²È«±àÂëºÍÌí¼Ó£¨ÏÖÔÚ²»»áÔÚ±àÂëÊ±ĞŞ¸ÄÈİÆ÷£©
+        // ç¬¬å››æ­¥ï¼šå®‰å…¨ç¼–ç å’Œæ·»åŠ ï¼ˆç°åœ¨ä¸ä¼šåœ¨ç¼–ç æ—¶ä¿®æ”¹å®¹å™¨ï¼‰
         for(auto& entry : newEntries) {
             vector<int> ktok = encode_direct(entry.first);
             vector<int> vtok = encode_direct(entry.second);
             
             if(ktok.empty() || vtok.empty()) {
-                cout << "[ÖªÊ¶¿â] ¾¯¸æ£º±àÂëÊ§°Ü£¬Ìø¹ı: " << entry.first << endl;
+                cout << "[çŸ¥è¯†åº“] è­¦å‘Šï¼šç¼–ç å¤±è´¥ï¼Œè·³è¿‡: " << entry.first << endl;
                 continue;
             }
             
-            // ´æ´¢ÖªÊ¶
+            // å­˜å‚¨çŸ¥è¯†
             knowledgeVec.emplace_back(entry.first, vtok);
             
-            // ´´½¨¸ÅÄî
+            // åˆ›å»ºæ¦‚å¿µ
             int cid = createConceptDirect(ktok);
             if(cid != -1) {
                 int idx = cid - nextConceptId;
@@ -1313,10 +1441,10 @@ struct TextTokenizer {
             }
         }
         
-        cout << "[ÖªÊ¶¿â] ¼ÓÔØÍê³É£¡¹² " << knowledgeVec.size() << " ÌõÖªÊ¶" << endl;
+        cout << "[çŸ¥è¯†åº“] åŠ è½½å®Œæˆï¼å…± " << knowledgeVec.size() << " æ¡çŸ¥è¯†" << endl;
         cout.flush();
     }
-    // ---------- Ô­ÓĞ³ÉÔ±º¯Êı ----------
+    // ---------- åŸæœ‰æˆå‘˜å‡½æ•° ----------
     TextTokenizer();
     int getTokenId(const string& s);
     vector<string> splitGBK(const string& s);
@@ -1340,14 +1468,14 @@ struct TextTokenizer {
     bool isChronological(int from, int to);
     void updateTokenCache();
 
-    // ---------- ĞÂÔö£ºÄ£°åÌáÈ¡ÓëÆ¥Åä ----------
+    // ---------- æ–°å¢ï¼šæ¨¡æ¿æå–ä¸åŒ¹é… ----------
     void extractTemplatesFromCorpus(const vector<int>& seq);
     void extractTemplatesFromExcellentFile();
     vector<int> matchPhraseByPrefix(int token1, int token2 = -1);
     AutoPosType matchPosSkeleton(const vector<AutoPosType>& recentPos);
 };
 
-// ===================== ³¬²ÎÊıÊµÏÖ =====================
+// ===================== è¶…å‚æ•°å®ç° =====================
 void HyperParams::autoTune(int q) {
     if(q>=70) {
         adjustParam("GEN_TEMP",+2,20,90); adjustParam("CREATE_CHAR_RATE_NORMAL",-1,10,30);
@@ -1401,12 +1529,12 @@ int* HyperParams::getParamPtr(const string& name) {
     return nullptr;
 }
 void HyperParams::reportParams() {
-    cout << "\n[µ±Ç°²ÎÊı] GEN_TEMP="<<GEN_TEMP<<" TOP_K="<<TOP_K_CAND<<" REFLECT="<<REFLECT_STRENGTH
+    cout << "\n[å½“å‰å‚æ•°] GEN_TEMP="<<GEN_TEMP<<" TOP_K="<<TOP_K_CAND<<" REFLECT="<<REFLECT_STRENGTH
          <<" CREATE_N="<<CREATE_CHAR_RATE_NORMAL<<" CREATE_E="<<CREATE_CHAR_RATE_EXCITE
          <<" PUNCT_PEN="<<PUNCT_DUPLICATE_PENALTY<<" CHAR_PEN="<<CHAR_DUPLICATE_PENALTY<<endl;
 }
 
-// ===================== Neuron ³ÉÔ±ÊµÏÖ =====================
+// ===================== Neuron æˆå‘˜å®ç° =====================
 void Neuron::setMode(NeuronMode m,int strength){
     mode=m; modeStrength=strength; compatibleModes.clear();
     if(m==MODE_LANGUAGE) compatibleModes={MODE_CONCEPT,MODE_ATTENTION};
@@ -1468,21 +1596,21 @@ void Neuron::pruneWeak(){
     inputs.swap(ni); outputs.swap(no);
 }
 void Neuron::updateEdges(){ for(auto& e:inputs) e.decay(); for(auto& e:outputs) e.decay(); pruneWeak(); }
-// ¼ÆËãÁ½¸öÓï¾³¿ìÕÕÖ®¼äµÄÏàËÆ¶È£¨»ùÓÚ×Ö¶ÎÆ¥Åä£©
+// è®¡ç®—ä¸¤ä¸ªè¯­å¢ƒå¿«ç…§ä¹‹é—´çš„ç›¸ä¼¼åº¦ï¼ˆåŸºäºå­—æ®µåŒ¹é…ï¼‰
 float computeContextSimilarity(const ContextSnapshot& a, const ContextSnapshot& b) {
     float score = 0.0f;
     if (a.prevPos == b.prevPos) score += 0.25f;
     if (a.nextPos == b.nextPos) score += 0.25f;
     if (a.logicType == b.logicType) score += 0.25f;
     if (a.isStart == b.isStart) score += 0.25f;
-    // ºöÂÔ prevToken ºÍ nextToken£¬ÒòÎªËüÃÇÊÇ¾ßÌå token ID£¬±ä»¯Ì«Ãô¸Ğ
-    return score;  // ·¶Î§ 0.0 ~ 1.0
+    // å¿½ç•¥ prevToken å’Œ nextTokenï¼Œå› ä¸ºå®ƒä»¬æ˜¯å…·ä½“ token IDï¼Œå˜åŒ–å¤ªæ•æ„Ÿ
+    return score;  // èŒƒå›´ 0.0 ~ 1.0
 }
 std::vector<std::pair<int, float>> Neuron::getEdgesWithMatchScore(int contextID) const {
     std::vector<std::pair<int, float>> result;
     result.reserve(outputs.size());
 
-    // ÏÈÕÒ³öµ±Ç°Óï¾³ÏÂÄÄĞ©±ß±»¼ÇÂ¼£¨¼´Ä¿±êtokenÔÚcontextBuckets[contextID]ÖĞ£©
+    // å…ˆæ‰¾å‡ºå½“å‰è¯­å¢ƒä¸‹å“ªäº›è¾¹è¢«è®°å½•ï¼ˆå³ç›®æ ‡tokenåœ¨contextBuckets[contextID]ä¸­ï¼‰
     std::unordered_set<int> activeEdgeIndices;
     if (contextID < (int)contextBuckets.size()) {
         const auto& targets = contextBuckets[contextID];
@@ -1490,15 +1618,15 @@ std::vector<std::pair<int, float>> Neuron::getEdgesWithMatchScore(int contextID)
             for (int i = 0; i < (int)outputs.size(); ++i) {
                 if (outputs[i].target == target) {
                     activeEdgeIndices.insert(i);
-                    break;  // Ã¿¸öÄ¿±êÖ»Æ¥ÅäµÚÒ»Ìõ±ß£¨Í¨³£Î¨Ò»£©
+                    break;  // æ¯ä¸ªç›®æ ‡åªåŒ¹é…ç¬¬ä¸€æ¡è¾¹ï¼ˆé€šå¸¸å”¯ä¸€ï¼‰
                 }
             }
         }
     }
 
-    // ÎªÃ¿Ìõ±ß·ÖÅäÆ¥Åä¶È
+    // ä¸ºæ¯æ¡è¾¹åˆ†é…åŒ¹é…åº¦
     for (int i = 0; i < (int)outputs.size(); ++i) {
-        // Èç¹û¸Ã±ßÔÚµ±Ç°Óï¾³ÏÂ±»¼ÇÂ¼£¬Æ¥Åä¶ÈÎª1.0£¬·ñÔòÎª0.2£¨»ù´¡´«²¥£©
+        // å¦‚æœè¯¥è¾¹åœ¨å½“å‰è¯­å¢ƒä¸‹è¢«è®°å½•ï¼ŒåŒ¹é…åº¦ä¸º1.0ï¼Œå¦åˆ™ä¸º0.2ï¼ˆåŸºç¡€ä¼ æ’­ï¼‰
         float matchScore = (activeEdgeIndices.count(i) > 0) ? 1.0f : 0.2f;
         result.emplace_back(i, matchScore);
     }
@@ -1515,7 +1643,7 @@ void Neuron::addTargetToContext(int contextID, int targetToken) {
     }
     bucket.push_back(targetToken);
 }
-// ===================== TextTokenizer ÊµÏÖ =====================
+// ===================== TextTokenizer å®ç° =====================
 TextTokenizer::TextTokenizer(){
     vocabList={"<pad>","<sos>","<eos>","<unk>"};
     tokenPosCache.resize(4, POS_UNKNOWN);
@@ -1598,7 +1726,7 @@ int TextTokenizer::createConcept(const vector<int>& tokens,const string& name){
 bool TextTokenizer::isStablePhrase(const vector<int>& gram){
     if(gram.size()<2) return false;
     string first=vocabList[gram[0]];
-    unordered_set<string> aux={"µÄ","ÁË","ÊÇ","Ò²","¾Í","¶¼","Òª","ÔÚ","ºÍ","Õâ","ÄÇ"};
+    unordered_set<string> aux={"çš„","äº†","æ˜¯","ä¹Ÿ","å°±","éƒ½","è¦","åœ¨","å’Œ","è¿™","é‚£"};
     if(aux.count(first)) return false;
     string last=vocabList[gram.back()];
     if(aux.count(last) && gram.size()>=2) return false;
@@ -1606,13 +1734,13 @@ bool TextTokenizer::isStablePhrase(const vector<int>& gram){
     return s.size()==gram.size();
 }
 AutoPosType TextTokenizer::getPosForToken(int tid) const {
-    // ÓÅÏÈ´Ó»º´æ¶ÁÈ¡
+    // ä¼˜å…ˆä»ç¼“å­˜è¯»å–
     auto it = posCache.find(tid);
     if (it != posCache.end()) {
         return it->second;
     }
 
-    // »ØÍËµ½¾ÉµÄ tokenPosCache
+    // å›é€€åˆ°æ—§çš„ tokenPosCache
     if (tid >= 0 && tid < (int)tokenPosCache.size()) {
         return tokenPosCache[tid];
     }
@@ -1620,12 +1748,12 @@ AutoPosType TextTokenizer::getPosForToken(int tid) const {
     return POS_UNKNOWN;
 }
 void TextTokenizer::setPosForToken(int tid, AutoPosType pos) {
-    // Ğ´Èë»º´æ
+    // å†™å…¥ç¼“å­˜
     if (tid >= 0) {
         posCache[tid] = pos;
     }
 
-    // Í¬Ê±Ğ´Èë¾ÉµÄ tokenPosCache£¨¼æÈİ¾ÉÂß¼­£©
+    // åŒæ—¶å†™å…¥æ—§çš„ tokenPosCacheï¼ˆå…¼å®¹æ—§é€»è¾‘ï¼‰
     if (tid >= 0 && tid < (int)tokenPosCache.size()) {
         tokenPosCache[tid] = pos;
     }
@@ -1700,7 +1828,7 @@ void TextTokenizer::updateEmbeddings(){
 }
 bool TextTokenizer::isHypothetical(int tid){
     if(tid<0 || tid>=(int)vocabList.size()) return false;
-    static unordered_set<string> hypoWords={"Èç¹û","¼ÙÈç","Èô","¼ÙÉè","ÒªÊÇ","ÌÈÈô"};
+    static unordered_set<string> hypoWords={"å¦‚æœ","å‡å¦‚","è‹¥","å‡è®¾","è¦æ˜¯","å€˜è‹¥"};
     return hypoWords.count(vocabList[tid]);
 }
 bool TextTokenizer::isChronological(int from,int to){
@@ -1708,7 +1836,7 @@ bool TextTokenizer::isChronological(int from,int to){
     return fwd>rev;
 }
 void TextTokenizer::updateTokenCache() {
-    // Ô­ÓĞÂß¼­£º¸üĞÂ tokenPosCache, tokenIsPunctCache, tokenIsNewCharCache
+    // åŸæœ‰é€»è¾‘ï¼šæ›´æ–° tokenPosCache, tokenIsPunctCache, tokenIsNewCharCache
     tokenPosCache.resize(vocabList.size(), POS_UNKNOWN);
     tokenIsPunctCache.resize(vocabList.size(), false);
     tokenIsNewCharCache.resize(vocabList.size(), false);
@@ -1718,7 +1846,7 @@ void TextTokenizer::updateTokenCache() {
         tokenIsNewCharCache[i] = isNewChar(vocabList[i]);
     }
 
-    // ========== ĞÂÔö£ºÍ¬²½ posCache µ½ tokenPosCache ==========
+    // ========== æ–°å¢ï¼šåŒæ­¥ posCache åˆ° tokenPosCache ==========
     for (const auto& entry : posCache) {
         int tid = entry.first;
         if (tid >= 0 && tid < (int)tokenPosCache.size()) {
@@ -1726,7 +1854,7 @@ void TextTokenizer::updateTokenCache() {
         }
     }
 }
-// ========== Ä£°åÌáÈ¡ÓëÆ¥Åä ==========
+// ========== æ¨¡æ¿æå–ä¸åŒ¹é… ==========
 void TextTokenizer::extractTemplatesFromCorpus(const vector<int>& seq) {
     if (seq.size() < 2) return;
     unordered_map<uint64_t, int> phraseCount;
@@ -1782,8 +1910,8 @@ void TextTokenizer::extractTemplatesFromExcellentFile() {
     string line;
     while (getline(f, line)) {
         if (line.empty() || line.size() < 3) continue;
-        string gbkLine = utf8ToGbk(line);   // ¡û ×ªÎª GBK
-        vector<int> seq = encode(gbkLine);  // ÏÖÔÚ encode µÃµ½ÕıÈ· GBK ĞòÁĞ
+        string gbkLine = utf8ToGbk(line);   // â† è½¬ä¸º GBK
+        vector<int> seq = encode(gbkLine);  // ç°åœ¨ encode å¾—åˆ°æ­£ç¡® GBK åºåˆ—
         extractTemplatesFromCorpus(seq);
     }
     f.close();
@@ -1833,7 +1961,7 @@ AutoPosType TextTokenizer::matchPosSkeleton(const vector<AutoPosType>& recentPos
     }
     return best;
 }
-// ===================== BrainCortex Àà¶¨Òå =====================
+// ===================== BrainCortex ç±»å®šä¹‰ =====================
 struct AttentionSubgraph {
     unordered_set<int> neurons;
     unordered_set<int> tokens;
@@ -1843,12 +1971,12 @@ struct AttentionSubgraph {
 class BrainCortex {
 public:
 	string getConsciousReport() { return generateConsciousReport(); }
-    // ========== TD Ñ§Ï°Ïà¹Ø ==========
+    // ========== TD å­¦ä¹ ç›¸å…³ ==========
     vector<vector<DynamicEdge*>> stepEdges;
     vector<int> stepFluency;
     const int MAX_TRACE = 15;
 
-    // Óï¾³IDÓ³Éä£¨ÓÃÓÚÑµÁ·ºÍ´«²¥£©
+    // è¯­å¢ƒIDæ˜ å°„ï¼ˆç”¨äºè®­ç»ƒå’Œä¼ æ’­ï¼‰
     unordered_map<uint64_t, int> contextHashToID;
     int getContextID(const ContextSnapshot& snap) {
         uint64_t h = snap.hash();
@@ -1920,7 +2048,7 @@ public:
     const int PREDICTION_HISTORY_SIZE = 100;
     float avgSurprise = 0.5f;
 
-    // ========== Îó²î´«²¥º¯Êı ==========
+    // ========== è¯¯å·®ä¼ æ’­å‡½æ•° ==========
     void propagateTokenError(int selectedToken, float surprise, 
                              const vector<int>& context, 
                              TextTokenizer& token);
@@ -1932,7 +2060,7 @@ public:
     void updateEdgeWithError(DynamicEdge* edge, float error, int fromToken, int toToken, TextTokenizer& token);
     ContextSnapshot buildSnapshot(const vector<int>& context, int currentToken, TextTokenizer& token);
 
-    // ========== Á½»·¶¯Ì¬¿ØÖÆÆ÷ ==========
+    // ========== ä¸¤ç¯åŠ¨æ€æ§åˆ¶å™¨ ==========
     int T=50, E=20, R=10;
     deque<int> T_history, E_history, R_history;
     int M1=30, M2=40;
@@ -1942,11 +2070,11 @@ public:
     const int delta1=8, epsilon1=2, zeta1=1;
     const int delta2=9, epsilon2=1, zeta2=1;
 
-    // ========== Ä£°åÆ¥ÅäÓëÀà±ÈÉú³É ==========
+    // ========== æ¨¡æ¿åŒ¹é…ä¸ç±»æ¯”ç”Ÿæˆ ==========
     int calcTemplateScore(const vector<int>& ctx, int candidate, TextTokenizer& token);
     vector<int> analogicalGenerate(const vector<int>& context, TextTokenizer& token);
 
-    // ========== ËÄºË¼Ü¹¹ĞÂÔö³ÉÔ± ==========
+    // ========== å››æ ¸æ¶æ„æ–°å¢æˆå‘˜ ==========
     float alpha_L = 1.0f;
     float alpha_A = 1.0f;
     float alpha_R = 1.0f;
@@ -1958,7 +2086,7 @@ public:
     std::unordered_map<int, int> calcRewardScore(const std::vector<int>& ctx, TextTokenizer& token);
     void updateGains(const std::vector<int>& ctx, TextTokenizer& token);
 
-    // ========== Ô­ÓĞº¯Êı ==========
+    // ========== åŸæœ‰å‡½æ•° ==========
     BrainCortex();
     void rebuildLayerIndex();
     int createNeuron(int layerIdx);
@@ -2013,9 +2141,9 @@ public:
     int calcScoreSubgraph(const vector<int>& ctx, int targetTid, TextTokenizer& token);
     void offlineConsolidation(TextTokenizer& token, int maxSeconds = 300);
 
-    // ========== ĞÂµÄËÄºË singleGenerate£¨ÉùÃ÷£© ==========
+    // ========== æ–°çš„å››æ ¸ singleGenerateï¼ˆå£°æ˜ï¼‰ ==========
     vector<int> singleGenerate(vector<int> ctx, TextTokenizer& token);
-    // ========== ĞÂÔö£º×´Ì¬²éÑ¯ ==========
+    // ========== æ–°å¢ï¼šçŠ¶æ€æŸ¥è¯¢ ==========
     int getTotalNeurons() const { 
         int sum = 0;
         for (const auto& layer : layers) sum += layer.size();
@@ -2031,13 +2159,13 @@ public:
     }
     int getGoalIntent() const { return goalIntent; }
     
-    // ========== ĞÂÔö£ºÔÚÏßÑ§Ï° ==========
+    // ========== æ–°å¢ï¼šåœ¨çº¿å­¦ä¹  ==========
     void onlineLearn(const string& text, TextTokenizer& tokenizer) {
         auto seq = tokenizer.encode(text);
         selfGrowth(seq, tokenizer);
     }
 
-    // ========== ¼¤»î±ß¼ÇÂ¼£¨°²È«°æ£º´æÉñ¾­ÔªID+Ä¿±êtoken£© ==========
+    // ========== æ¿€æ´»è¾¹è®°å½•ï¼ˆå®‰å…¨ç‰ˆï¼šå­˜ç¥ç»å…ƒID+ç›®æ ‡tokenï¼‰ ==========
     vector<pair<int, int>> activatedEdgeKeys;  // {neuronId, targetToken}
     vector<int> activatedTokens;
     
@@ -2056,7 +2184,7 @@ public:
         if (tid > 3) activatedTokens.push_back(tid);
     }
     
-    // Í¨¹ı (neuronId, targetToken) ²éÕÒ±ß
+    // é€šè¿‡ (neuronId, targetToken) æŸ¥æ‰¾è¾¹
     DynamicEdge* findEdgeByKey(int neuronId, int targetToken) {
         Neuron* neu = findNeuronById(neuronId);
         if (!neu) return nullptr;
@@ -2065,7 +2193,7 @@ public:
     
     void reinforceActivatedEdges(int delta = 5) {
         if (activatedEdgeKeys.empty()) {
-            cout << "[·´À¡] Ã»ÓĞ¼¤»îµÄ±ß¿ÉÇ¿»¯" << endl;
+            cout << "[åé¦ˆ] æ²¡æœ‰æ¿€æ´»çš„è¾¹å¯å¼ºåŒ–" << endl;
             return;
         }
         
@@ -2086,13 +2214,13 @@ public:
             }
         }
         
-        cout << "[·´À¡] ? Ç¿»¯ÁË " << count << " Ìõ¼¤»î±ß (+" << delta << ")" << endl;
+        cout << "[åé¦ˆ] ? å¼ºåŒ–äº† " << count << " æ¡æ¿€æ´»è¾¹ (+" << delta << ")" << endl;
         clearActivatedEdges();
     }
     
     void punishActivatedEdges(int delta = 5) {
         if (activatedEdgeKeys.empty()) {
-            cout << "[·´À¡] Ã»ÓĞ¼¤»îµÄ±ß¿É³Í·£" << endl;
+            cout << "[åé¦ˆ] æ²¡æœ‰æ¿€æ´»çš„è¾¹å¯æƒ©ç½š" << endl;
             return;
         }
         
@@ -2104,13 +2232,13 @@ public:
             count++;
         }
         
-        cout << "[·´À¡] ? ³Í·£ÁË " << count << " Ìõ¼¤»î±ß (-" << delta << ")" << endl;
+        cout << "[åé¦ˆ] ? æƒ©ç½šäº† " << count << " æ¡æ¿€æ´»è¾¹ (-" << delta << ")" << endl;
         clearActivatedEdges();
     }
 };
-// ========== Î»ÖÃ¹ì¼£Ïà¹Øº¯Êı ==========
+// ========== ä½ç½®è½¨è¿¹ç›¸å…³å‡½æ•° ==========
 
-// ¼ÇÂ¼Ò»¸ötokenÔÚÄ³¸öÓï¾³ÏÂµÄÎ»ÖÃ°Ù·Ö±È
+// è®°å½•ä¸€ä¸ªtokenåœ¨æŸä¸ªè¯­å¢ƒä¸‹çš„ä½ç½®ç™¾åˆ†æ¯”
 void BrainCortex::recordTokenPosition(int tokenId, int contextID, int positionPercent) {
     if (tokenId <= 3 || contextID < 0) return;
     Neuron* neu = findNeuronByToken(tokenId);
@@ -2122,7 +2250,7 @@ void BrainCortex::recordTokenPosition(int tokenId, int contextID, int positionPe
     neu->recordPosition(contextID, positionPercent);
 }
 
-// ¼ÆËãÒ»¸ötokenÔÚµ±Ç°Î»ÖÃÏÂµÄÎ»ÖÃÆ¥ÅäµÃ·Ö
+// è®¡ç®—ä¸€ä¸ªtokenåœ¨å½“å‰ä½ç½®ä¸‹çš„ä½ç½®åŒ¹é…å¾—åˆ†
 int BrainCortex::calcPositionalScore(int tokenId, int contextID, int currentPosPct) {
     if (tokenId <= 3 || contextID < 0) return 0;
     Neuron* neu = findNeuronByToken(tokenId);
@@ -2130,14 +2258,14 @@ int BrainCortex::calcPositionalScore(int tokenId, int contextID, int currentPosP
     return neu->calcPositionMatchScore(contextID, currentPosPct);
 }
 
-// »ñÈ¡Î»ÖÃÕªÒª£¨µ÷ÊÔÓÃ£©
+// è·å–ä½ç½®æ‘˜è¦ï¼ˆè°ƒè¯•ç”¨ï¼‰
 string BrainCortex::getPositionSummary(int tokenId, int contextID) {
-    if (tokenId <= 3 || contextID < 0) return "£¨ÎŞĞ§token£©";
+    if (tokenId <= 3 || contextID < 0) return "ï¼ˆæ— æ•ˆtokenï¼‰";
     Neuron* neu = findNeuronByToken(tokenId);
-    if (!neu) return "£¨Î´ÕÒµ½Éñ¾­Ôª£©";
+    if (!neu) return "ï¼ˆæœªæ‰¾åˆ°ç¥ç»å…ƒï¼‰";
 
     const vector<int>* positions = neu->getPositionsForContext(contextID);
-    if (!positions || positions->empty()) return "£¨ÎŞÎ»ÖÃÊı¾İ£©";
+    if (!positions || positions->empty()) return "ï¼ˆæ— ä½ç½®æ•°æ®ï¼‰";
 
     int sum = 0, minPos = 100, maxPos = 0;
     for (int p : *positions) {
@@ -2148,11 +2276,11 @@ string BrainCortex::getPositionSummary(int tokenId, int contextID) {
     float avg = (float)sum / positions->size();
 
     stringstream ss;
-    ss << "³öÏÖ" << positions->size() << "´Î£¬Î»ÖÃ·¶Î§ " << minPos << "%~" << maxPos << "%£¬Æ½¾ù " << (int)avg << "%";
+    ss << "å‡ºç°" << positions->size() << "æ¬¡ï¼Œä½ç½®èŒƒå›´ " << minPos << "%~" << maxPos << "%ï¼Œå¹³å‡ " << (int)avg << "%";
     return ss.str();
 }
-// ===================== BrainCortex ÊµÏÖ =====================
-// ¹¹½¨Óï¾³¿ìÕÕ
+// ===================== BrainCortex å®ç° =====================
+// æ„å»ºè¯­å¢ƒå¿«ç…§
 ContextSnapshot BrainCortex::buildSnapshot(const vector<int>& context, int currentToken, TextTokenizer& token) {
     ContextSnapshot snap;
     if (!context.empty()) {
@@ -2175,34 +2303,34 @@ ContextSnapshot BrainCortex::buildSnapshot(const vector<int>& context, int curre
     return snap;
 }
 
-// ¸üĞÂ±ß´øÎó²î
+// æ›´æ–°è¾¹å¸¦è¯¯å·®
 void BrainCortex::updateEdgeWithError(DynamicEdge* edge, float error, int fromToken, int toToken, TextTokenizer& token) {
     if (!edge) return;
     
-    // ¼ÇÂ¼Îó²î
+    // è®°å½•è¯¯å·®
     edge->updateError(error);
     
-    // ¸ù¾İÎó²îµ÷ÕûÈ¨ÖØ
+    // æ ¹æ®è¯¯å·®è°ƒæ•´æƒé‡
     if (error > 2.0f) {
-        // ¸ßÎó²î£ºÇ¿»¯£¨Ñ§Ï°ĞÂ¹æÂÉ£©
+        // é«˜è¯¯å·®ï¼šå¼ºåŒ–ï¼ˆå­¦ä¹ æ–°è§„å¾‹ï¼‰
         int boostAmount = (int)(error * 0.3f) + 1;
         edge->weight += boostAmount;
         
-        // ¼ÇÂ¼Óï¾³
+        // è®°å½•è¯­å¢ƒ
         vector<int> ctx = {fromToken, toToken};
         ContextSnapshot snap = buildSnapshot(ctx, toToken, token);
         edge->addContext(snap, (int)(error * 0.5f));
         
     } else if (error < 0.5f && edge->errorHistory.size() > 10) {
-        // µÍÎó²îÇÒÎÈ¶¨£ºÂÔÎ¢Èõ»¯£¨±ÜÃâ¹ıÄâºÏ£©
+        // ä½è¯¯å·®ä¸”ç¨³å®šï¼šç•¥å¾®å¼±åŒ–ï¼ˆé¿å…è¿‡æ‹Ÿåˆï¼‰
         edge->weight = max(0, edge->weight - 1);
     }
     
-    // ÏŞÖÆÈ¨ÖØ
+    // é™åˆ¶æƒé‡
     if (edge->weight > 200) edge->weight = 200;
 }
 
-// Ö÷Îó²î´«²¥º¯Êı
+// ä¸»è¯¯å·®ä¼ æ’­å‡½æ•°
 void BrainCortex::propagateTokenError(int selectedToken, float surprise, 
                                       const vector<int>& context, 
                                       TextTokenizer& token) {
@@ -2212,22 +2340,22 @@ void BrainCortex::propagateTokenError(int selectedToken, float surprise,
     Neuron* prevNeu = findNeuronByToken(lastToken);
     if (!prevNeu) return;
     
-    // 1. ¸üĞÂÇ°Ò»¸öÉñ¾­ÔªµÄÔ¤²âÖÃĞÅ¶È
+    // 1. æ›´æ–°å‰ä¸€ä¸ªç¥ç»å…ƒçš„é¢„æµ‹ç½®ä¿¡åº¦
     prevNeu->predictionConfidence = 1.0f - min(1.0f, surprise / 10.0f);
     
-    // 2. ÕÒµ½Ö¸ÏòselectedTokenµÄ±ß
+    // 2. æ‰¾åˆ°æŒ‡å‘selectedTokençš„è¾¹
     DynamicEdge* edge = prevNeu->findOutput(selectedToken);
     if (!edge) return;
     
-    // 3. ¸üĞÂ±ßÎó²î
+    // 3. æ›´æ–°è¾¹è¯¯å·®
     updateEdgeWithError(edge, surprise, lastToken, selectedToken, token);
     
-    // 4. Èç¹ûsurprise¸ß£¨ÒâÍâ£©£¬´¥·¢·´ÏòÍÆÀí
+    // 4. å¦‚æœsurpriseé«˜ï¼ˆæ„å¤–ï¼‰ï¼Œè§¦å‘åå‘æ¨ç†
     if (surprise > 3.0f) {
         triggerBackwardReasoning(lastToken, selectedToken, context, token);
     }
     
-    // 5. Îó²î´«²¥µ½¸üÔçµÄÉÏÏÂÎÄ£¨Ë¥¼õ£©
+    // 5. è¯¯å·®ä¼ æ’­åˆ°æ›´æ—©çš„ä¸Šä¸‹æ–‡ï¼ˆè¡°å‡ï¼‰
     if (context.size() >= 2 && surprise > 1.0f) {
         int earlierToken = context[context.size() - 2];
         Neuron* earlierNeu = findNeuronByToken(earlierToken);
@@ -2235,7 +2363,7 @@ void BrainCortex::propagateTokenError(int selectedToken, float surprise,
             float dilutedError = surprise * 0.3f / context.size();
             earlierNeu->errorAccumulator += dilutedError;
             
-            // Èç¹ûÀÛ»ıÎó²î¹ı´ó£¬´¥·¢"ÖØĞÂÆÀ¹À"
+            // å¦‚æœç´¯ç§¯è¯¯å·®è¿‡å¤§ï¼Œè§¦å‘"é‡æ–°è¯„ä¼°"
             if (earlierNeu->errorAccumulator > 8.0f) {
                 reevaluateContext(context, token);
                 earlierNeu->errorAccumulator = 0;
@@ -2243,19 +2371,19 @@ void BrainCortex::propagateTokenError(int selectedToken, float surprise,
         }
     }
     
-    // 6. ¸üĞÂÈ«¾ÖÆ½¾ù¾ªÏ²¶È
+    // 6. æ›´æ–°å…¨å±€å¹³å‡æƒŠå–œåº¦
     avgSurprise = avgSurprise * 0.9f + surprise * 0.1f;
 }
 
-// ·´ÏòÍÆÀí
+// åå‘æ¨ç†
 void BrainCortex::triggerBackwardReasoning(int fromToken, int toToken, 
                                            const vector<int>& context,
                                            TextTokenizer& token) {
-    // »ñÈ¡Ô´Éñ¾­Ôª
+    // è·å–æºç¥ç»å…ƒ
     Neuron* prevNeu = findNeuronByToken(fromToken);
     if (!prevNeu) return;
     
-    // 1. ¼ì²éÆäËûºòÑ¡token
+    // 1. æ£€æŸ¥å…¶ä»–å€™é€‰token
     vector<pair<int, int>> otherCandidates;
     for (auto& edge : prevNeu->outputs) {
         if (edge.target == toToken) continue;
@@ -2264,7 +2392,7 @@ void BrainCortex::triggerBackwardReasoning(int fromToken, int toToken,
         }
     }
     
-    // 2. Èç¹û´æÔÚ¸üÇ¿µÄÁ¬½Ó£¬½¨Á¢Óï¾³ÆÚÍû
+    // 2. å¦‚æœå­˜åœ¨æ›´å¼ºçš„è¿æ¥ï¼Œå»ºç«‹è¯­å¢ƒæœŸæœ›
     if (!otherCandidates.empty()) {
         sort(otherCandidates.begin(), otherCandidates.end(),
              [](auto& a, auto& b) { return a.second > b.second; });
@@ -2273,16 +2401,16 @@ void BrainCortex::triggerBackwardReasoning(int fromToken, int toToken,
         ContextSnapshot snap = buildSnapshot(context, toToken, token);
         prevNeu->addContextExpectation(snap, expectedToken);
         
-        // ¼ÇÂ¼µ½µ÷ÊÔÊä³ö
+        // è®°å½•åˆ°è°ƒè¯•è¾“å‡º
         if (expectedToken >= 0 && expectedToken < (int)token.vocabList.size() &&
             toToken >= 0 && toToken < (int)token.vocabList.size()) {
-            cout << "[·´ÏòÍÆÀí] Óï¾³ÖĞÆÚÍû '" 
+            cout << "[åå‘æ¨ç†] è¯­å¢ƒä¸­æœŸæœ› '" 
                  << token.vocabList[expectedToken] 
-                 << "' µ«Ñ¡ÔñÁË '" << token.vocabList[toToken] << "'" << endl;
+                 << "' ä½†é€‰æ‹©äº† '" << token.vocabList[toToken] << "'" << endl;
         }
     }
     
-    // 3. Èç¹û´æÔÚÇ°ÏòÁ¬½Ó£¬´«²¥Îó²î
+    // 3. å¦‚æœå­˜åœ¨å‰å‘è¿æ¥ï¼Œä¼ æ’­è¯¯å·®
     if (context.size() >= 2) {
         int earlierToken = context[context.size() - 2];
         Neuron* earlierNeu = findNeuronByToken(earlierToken);
@@ -2293,11 +2421,11 @@ void BrainCortex::triggerBackwardReasoning(int fromToken, int toToken,
     }
 }
 
-// ÉÏÏÂÎÄÖØĞÂÆÀ¹À
+// ä¸Šä¸‹æ–‡é‡æ–°è¯„ä¼°
 void BrainCortex::reevaluateContext(const vector<int>& context, TextTokenizer& token) {
     if (context.size() < 2) return;
     
-    // 1. ¶ÔÉÏÏÂÎÄÖĞµÄÃ¿¸ö±ß£¬¼ì²éºÏÀíĞÔ
+    // 1. å¯¹ä¸Šä¸‹æ–‡ä¸­çš„æ¯ä¸ªè¾¹ï¼Œæ£€æŸ¥åˆç†æ€§
     for (int i = 0; i < (int)context.size() - 1; i++) {
         int from = context[i];
         int to = context[i + 1];
@@ -2309,30 +2437,30 @@ void BrainCortex::reevaluateContext(const vector<int>& context, TextTokenizer& t
         DynamicEdge* edge = neu->findOutput(to);
         if (!edge) continue;
         
-        // 2. ¼ÆËã¸Ã±ßÔÚµ±Ç°Óï¾³ÏÂµÄºÏÀíĞÔ
+        // 2. è®¡ç®—è¯¥è¾¹åœ¨å½“å‰è¯­å¢ƒä¸‹çš„åˆç†æ€§
         ContextSnapshot snap = buildSnapshot(context, to, token);
         int contextWeight = edge->getContextWeight(snap);
         int baseWeight = edge->weight;
         
         float rationality = (float)contextWeight / (baseWeight + 1);
         
-        // 3. µ÷Õû
+        // 3. è°ƒæ•´
         if (rationality < 0.2f && baseWeight > 10) {
-            // ÔÚÆäËûÓï¾³ÏÂºÜÇ¿£¬µ±Ç°Óï¾³ºÜÈõ ¡ú ÊÊÓ¦µ±Ç°Óï¾³
+            // åœ¨å…¶ä»–è¯­å¢ƒä¸‹å¾ˆå¼ºï¼Œå½“å‰è¯­å¢ƒå¾ˆå¼± â†’ é€‚åº”å½“å‰è¯­å¢ƒ
             edge->addContext(snap, 8);
             edge->weight += 1;
         }
         
         if (rationality > 3.0f && baseWeight < 30) {
-            // ÔÚµ±Ç°Óï¾³ÏÂÒì³£Ç¿ ¡ú ÌáÉı»ù´¡È¨ÖØ
+            // åœ¨å½“å‰è¯­å¢ƒä¸‹å¼‚å¸¸å¼º â†’ æå‡åŸºç¡€æƒé‡
             edge->weight += 2;
         }
     }
 }
 
-// È«¾ÖÎó²îÕûºÏ
+// å…¨å±€è¯¯å·®æ•´åˆ
 void BrainCortex::integrateGlobalPredictionError() {
-    // 1. ¼ì²é½üÆÚÔ¤²â¼ÇÂ¼
+    // 1. æ£€æŸ¥è¿‘æœŸé¢„æµ‹è®°å½•
     if (predictionHistory.empty()) return;
     
     float recentSurprise = 0;
@@ -2344,17 +2472,17 @@ void BrainCortex::integrateGlobalPredictionError() {
     }
     recentSurprise /= count;
     
-    // 2. ¸ù¾İÎó²îµ÷ÕûÍØÆË
+    // 2. æ ¹æ®è¯¯å·®è°ƒæ•´æ‹“æ‰‘
     if (recentSurprise > 4.0f && neurogenesisCooldown <= 0) {
-        // ¸ß¾ªÏ² ¡ú Ôö¼ÓÉñ¾­Ôª£¨Ì½Ë÷ĞÂÄ£Ê½£©
+        // é«˜æƒŠå–œ â†’ å¢åŠ ç¥ç»å…ƒï¼ˆæ¢ç´¢æ–°æ¨¡å¼ï¼‰
         addRandomNeuron();
         neurogenesisCooldown = hp.NEUROGENESIS_COOLDOWN;
-        cout << "[È«¾ÖÎó²î] ¸ß¾ªÏ²¶È(" << recentSurprise 
-             << ")£¬ĞÂÔöÉñ¾­ÔªÌ½Ë÷ĞÂÄ£Ê½" << endl;
+        cout << "[å…¨å±€è¯¯å·®] é«˜æƒŠå–œåº¦(" << recentSurprise 
+             << ")ï¼Œæ–°å¢ç¥ç»å…ƒæ¢ç´¢æ–°æ¨¡å¼" << endl;
     }
     
     if (recentSurprise < 0.3f) {
-        // µÍ¾ªÏ² ¡ú ĞŞ¼ôÈßÓàÁ¬½Ó
+        // ä½æƒŠå–œ â†’ ä¿®å‰ªå†—ä½™è¿æ¥
         int pruned = 0;
         for (auto& layer : layers) {
             for (auto& neu : layer) {
@@ -2369,20 +2497,20 @@ void BrainCortex::integrateGlobalPredictionError() {
             }
         }
         if (pruned > 0) {
-            cout << "[È«¾ÖÎó²î] µÍ¾ªÏ²¶È(" << recentSurprise 
-                 << ")£¬ĞŞ¼ôÁË " << pruned << " ÌõÈßÓà±ß" << endl;
+            cout << "[å…¨å±€è¯¯å·®] ä½æƒŠå–œåº¦(" << recentSurprise 
+                 << ")ï¼Œä¿®å‰ªäº† " << pruned << " æ¡å†—ä½™è¾¹" << endl;
         }
     }
     
-    // 3. ¸üĞÂ×ÔÎÒÄ£ĞÍ
+    // 3. æ›´æ–°è‡ªæˆ‘æ¨¡å‹
     setSelfValue("PredictionErrorGlobal", recentSurprise);
     setSelfValue("SurpriseAvg", recentSurprise);
     
-    // 4. Èç¹ûÔ¤²âÎó²î³ÖĞøÆ«¸ß£¬µ÷ÕûÎÂ¶È
+    // 4. å¦‚æœé¢„æµ‹è¯¯å·®æŒç»­åé«˜ï¼Œè°ƒæ•´æ¸©åº¦
     if (recentSurprise > 5.0f && predictionHistory.size() > 10) {
-        // Ìá¸ßÌ½Ë÷ĞÔ
+        // æé«˜æ¢ç´¢æ€§
         hp.GEN_TEMP = min(90, hp.GEN_TEMP + 2);
-        cout << "[È«¾ÖÎó²î] ³ÖĞø¸ßÎó²î£¬Ìá¸ßÉú³ÉÎÂ¶Èµ½ " << hp.GEN_TEMP << endl;
+        cout << "[å…¨å±€è¯¯å·®] æŒç»­é«˜è¯¯å·®ï¼Œæé«˜ç”Ÿæˆæ¸©åº¦åˆ° " << hp.GEN_TEMP << endl;
     }
 }
 void BrainCortex::recordStepEdges(const vector<DynamicEdge*>& edges) {
@@ -2527,7 +2655,7 @@ void BrainCortex::emotionModulate() {
 
 void BrainCortex::layerForwardPass(TextTokenizer& token) {
     workspace.clear();
-	logger.logDebug("layerForwardPass ½øÈë");
+	logger.logDebug("layerForwardPass è¿›å…¥");
     
     workspace.clear();
     logger.logDebug("workspace cleared");
@@ -2551,19 +2679,19 @@ void BrainCortex::layerForwardPass(TextTokenizer& token) {
         currentSnap.isStart = true;
         currentSnap.isEnd = false;
     }
-	logger.logDebug("[DEBUG] Óï¾³¿ìÕÕ¹¹½¨Íê³É");
+	logger.logDebug("[DEBUG] è¯­å¢ƒå¿«ç…§æ„å»ºå®Œæˆ");
     int currentContextID = getContextID(currentSnap);
     logger.logDebug("currentContextID = " + to_string(currentContextID));
 
     for (int lay = 0; lay < hp.CORTEX_LAYERS - 1; ++lay) {
-        logger.logDebug("´¦Àí²ã " + to_string(lay) + ", Éñ¾­ÔªÊı=" + to_string(layers[lay].size()));
+        logger.logDebug("å¤„ç†å±‚ " + to_string(lay) + ", ç¥ç»å…ƒæ•°=" + to_string(layers[lay].size()));
         
         const auto& currLayer = layers[lay];
         auto& nextLayer = layers[lay+1];
         const auto& nextIdxMap = layerIdToIndex[lay+1];
 
         for (auto& neu : nextLayer) neu.layerFeature = 0;
-        logger.logDebug("²ã " + to_string(lay) + " ³õÊ¼»¯Íê³É");
+        logger.logDebug("å±‚ " + to_string(lay) + " åˆå§‹åŒ–å®Œæˆ");
 
         for (int i = 0; i < (int)currLayer.size(); ++i) {
             const Neuron& neu = currLayer[i];
@@ -2589,9 +2717,9 @@ void BrainCortex::layerForwardPass(TextTokenizer& token) {
                 nextLayer[it->second].layerFeature += contrib;
             }
         }
-        logger.logDebug("²ã " + to_string(lay) + " ´¦ÀíÍê³É");
+        logger.logDebug("å±‚ " + to_string(lay) + " å¤„ç†å®Œæˆ");
     }
-    logger.logDebug("layerForwardPass Íê³É");
+    logger.logDebug("layerForwardPass å®Œæˆ");
 }
 
 
@@ -2627,7 +2755,7 @@ void BrainCortex::injectKnowledge(int conceptId, const vector<int>& content, Tex
 }
 
 bool BrainCortex::isLogicalConsistent(int fromToken,int toToken,LogicRelation rel,const vector<int>& context,TextTokenizer& token){
-    static unordered_map<string,string> antonym={{"ºÃ","»µ"},{"´ó","Ğ¡"},{"ÈÈ","Àä"},{"¸ß","µÍ"},{"¶à","ÉÙ"}};
+    static unordered_map<string,string> antonym={{"å¥½","å"},{"å¤§","å°"},{"çƒ­","å†·"},{"é«˜","ä½"},{"å¤š","å°‘"}};
     string fromWord=(fromToken>=0 && fromToken<(int)token.vocabList.size())?token.vocabList[fromToken]:"";
     string toWord=(toToken>=0 && toToken<(int)token.vocabList.size())?token.vocabList[toToken]:"";
     if(rel==LOGIC_CAUSE && antonym.count(fromWord) && antonym[fromWord]==toWord) return false;
@@ -2869,10 +2997,10 @@ void BrainCortex::learnLogicRelations(const vector<int>& seq, TextTokenizer& tok
     int n = (int)seq.size();
     if (n < 2) return;
 
-    const int MAX_DIST = 1;                     // Ö»½¨ÏàÁÚ±ß
+    const int MAX_DIST = 1;                     // åªå»ºç›¸é‚»è¾¹
     const int SATURATION_LIMIT = 30;
 
-    // »ñÈ¡ËùÓĞÉñ¾­ÔªµÄÖ¸Õë£¨ÓÃÓÚ¿ìËÙ·ÃÎÊ£©
+    // è·å–æ‰€æœ‰ç¥ç»å…ƒçš„æŒ‡é’ˆï¼ˆç”¨äºå¿«é€Ÿè®¿é—®ï¼‰
     vector<Neuron*> neurons(n, nullptr);
     for (int i = 0; i < n; ++i) {
         int tid = seq[i];
@@ -2884,15 +3012,15 @@ void BrainCortex::learnLogicRelations(const vector<int>& seq, TextTokenizer& tok
         }
     }
 
-    float maxPos = max(1, n - 1);  // ÓÃÓÚ¹éÒ»»¯Î»ÖÃ
+    float maxPos = max(1, n - 1);  // ç”¨äºå½’ä¸€åŒ–ä½ç½®
 
     for (int i = 0; i < n; ++i) {
         if (!neurons[i]) continue;
         Neuron* neuA = neurons[i];
 
-        // ========== ĞÂÔö£º¼ÇÂ¼µ±Ç°tokenµÄÎ»ÖÃ ==========
+        // ========== æ–°å¢ï¼šè®°å½•å½“å‰tokençš„ä½ç½® ==========
         int posPct = (int)((float)i / maxPos * 100);
-        // ¹¹½¨µ±Ç°Óï¾³µÄ¿ìÕÕ
+        // æ„å»ºå½“å‰è¯­å¢ƒçš„å¿«ç…§
         ContextSnapshot currentSnap;
         currentSnap.prevToken = (i >= 1) ? seq[i-1] : -1;
         currentSnap.nextToken = (i+1 < n) ? seq[i+1] : -1;
@@ -2906,12 +3034,12 @@ void BrainCortex::learnLogicRelations(const vector<int>& seq, TextTokenizer& tok
         int currentContextID = getContextID(currentSnap);
         recordTokenPosition(seq[i], currentContextID, posPct);
 
-        // Ô­ÓĞÂß¼­£º½¨Á¢ÏàÁÚ±ß
+        // åŸæœ‰é€»è¾‘ï¼šå»ºç«‹ç›¸é‚»è¾¹
         for (int j = i + 1; j < n && (j - i) <= MAX_DIST; ++j) {
             if (!neurons[j]) continue;
             int b = seq[j];
 
-            // Óï¾³¿ìÕÕ£¨ÓÃÓÚ±ß£©
+            // è¯­å¢ƒå¿«ç…§ï¼ˆç”¨äºè¾¹ï¼‰
             ContextSnapshot snap;
             snap.prevToken = (i >= 1) ? seq[i-1] : -1;
             snap.nextToken = (j+1 < n) ? seq[j+1] : -1;
@@ -2924,7 +3052,7 @@ void BrainCortex::learnLogicRelations(const vector<int>& seq, TextTokenizer& tok
             snap.isEnd = (j == n-1);
             int contextID = getContextID(snap);
 
-            // ---------- ÔÚ outputs ÖĞ½¨Á¢±ß ----------
+            // ---------- åœ¨ outputs ä¸­å»ºç«‹è¾¹ ----------
             DynamicEdge* edge = neuA->findOutput(b);
             if (!edge) {
                 neuA->outputs.emplace_back(b);
@@ -2933,12 +3061,12 @@ void BrainCortex::learnLogicRelations(const vector<int>& seq, TextTokenizer& tok
             }
             edge->weight = min(SATURATION_LIMIT, edge->weight + 1);
 
-            // ---------- ½«Ä¿±êtoken¼ÓÈëÉñ¾­ÔªµÄÓï¾³Í° ----------
+            // ---------- å°†ç›®æ ‡tokenåŠ å…¥ç¥ç»å…ƒçš„è¯­å¢ƒæ¡¶ ----------
             neuA->addTargetToContext(contextID, b);
         }
     }
 
-    // ×Ô¶¯¹éÄÉÂß¼­¹ØÏµ£¨±£ÁôÔ­Âß¼­£©
+    // è‡ªåŠ¨å½’çº³é€»è¾‘å…³ç³»ï¼ˆä¿ç•™åŸé€»è¾‘ï¼‰
     static int lastTotal = 0;
     if (token.totalTransCount - lastTotal > 2000) {
         autoInduceRelationsLocked(token);
@@ -2947,16 +3075,16 @@ void BrainCortex::learnLogicRelations(const vector<int>& seq, TextTokenizer& tok
 }
 
 void BrainCortex::autoLearnAllPos(const vector<int>& seq, TextTokenizer& token) {
-    // ========== ĞÂ°æ£ºÖ±½ÓÊ¹ÓÃÍâ²¿´ÊĞÔ±ê×¢ ==========
-    // ²»ÔÙÊ¹ÓÃ¹æÔòºÍÍ³¼Æ£¬Ö±½Ó´Ó»º´æ¶ÁÈ¡
+    // ========== æ–°ç‰ˆï¼šç›´æ¥ä½¿ç”¨å¤–éƒ¨è¯æ€§æ ‡æ³¨ ==========
+    // ä¸å†ä½¿ç”¨è§„åˆ™å’Œç»Ÿè®¡ï¼Œç›´æ¥ä»ç¼“å­˜è¯»å–
 
     for (int i = 0; i < (int)seq.size(); i++) {
         int tid = seq[i];
-        if (tid <= 3) continue;  // Ìø¹ı <pad>, <sos>, <eos>, <unk>
+        if (tid <= 3) continue;  // è·³è¿‡ <pad>, <sos>, <eos>, <unk>
 
         AutoPosType pos = token.getPosForToken(tid);
 
-        // Ğ´ÈëÉñ¾­Ôª
+        // å†™å…¥ç¥ç»å…ƒ
         Neuron* targetNode = findNeuronByToken(tid);
         if (targetNode) {
             targetNode->autoPos = pos;
@@ -2969,10 +3097,10 @@ void BrainCortex::autoLearnAllPos(const vector<int>& seq, TextTokenizer& token) 
 }
 
 void BrainCortex::selfGrowth(const vector<int>& seq, TextTokenizer& token) {
-    cout << "  ÌáÈ¡¸ÅÄî..."; fflush(stdout);
+    cout << "  æå–æ¦‚å¿µ..."; fflush(stdout);
     vector<int> concepts = token.extractConceptsFromSeq(seq);
     injectConcepts(concepts);
-    cout << "Íê³É\n  ½¨Á¢¾Ö²¿Á¬½Ó..."; fflush(stdout);
+    cout << "å®Œæˆ\n  å»ºç«‹å±€éƒ¨è¿æ¥..."; fflush(stdout);
 
     int n = seq.size();
     for (int i = 0; i < n; i++) {
@@ -2996,22 +3124,22 @@ void BrainCortex::selfGrowth(const vector<int>& seq, TextTokenizer& token) {
         }
     }
 
-    cout << "Íê³É\n  Ñ§Ï°Âß¼­¹ØÏµ..."; fflush(stdout);
+    cout << "å®Œæˆ\n  å­¦ä¹ é€»è¾‘å…³ç³»..."; fflush(stdout);
     learnLogicRelations(seq, token);
-    cout << "Íê³É\n  ¸üĞÂËùÓĞ²ã..."; fflush(stdout);
+    cout << "å®Œæˆ\n  æ›´æ–°æ‰€æœ‰å±‚..."; fflush(stdout);
     updateAllLayers();
     pruneWeakNodes();
-    cout << "Íê³É\n  ×Ô¶¯Ñ§Ï°´ÊĞÔ..."; fflush(stdout);
+    cout << "å®Œæˆ\n  è‡ªåŠ¨å­¦ä¹ è¯æ€§..."; fflush(stdout);
 
-    // ========== ĞÂÔö£ºÏÈÓÃÍâ²¿´ÊĞÔ·ÖÎöÆ÷·ÖÎöÕû¶ÎÎÄ±¾ ==========
+    // ========== æ–°å¢ï¼šå…ˆç”¨å¤–éƒ¨è¯æ€§åˆ†æå™¨åˆ†ææ•´æ®µæ–‡æœ¬ ==========
     string fullText = token.decode(seq);
     token.analyzeText(fullText);
 
-    // ÔÙ×Ô¶¯Ñ§Ï°´ÊĞÔ£¨´Ó»º´æ¶ÁÈ¡£©
+    // å†è‡ªåŠ¨å­¦ä¹ è¯æ€§ï¼ˆä»ç¼“å­˜è¯»å–ï¼‰
     autoLearnAllPos(seq, token);
 
     token.updateTokenCache();
-    cout << "Íê³É" << endl;
+    cout << "å®Œæˆ" << endl;
     rebuildLayerIndex();
 }
 
@@ -3052,9 +3180,9 @@ int BrainCortex::calcScore(const vector<int>& ctx, int targetTid, TextTokenizer&
     lock_guard<recursive_mutex> lock(cortexMtx);
     if (targetTid < 0) return 0;
 
-    // ========== ĞŞ¸Ä£ºÈç¹û×ÓÍ¼ÒÑ¹¹½¨£¬Ê¹ÓÃ×ÓÍ¼ÆÀ·Ö ==========
+    // ========== ä¿®æ”¹ï¼šå¦‚æœå­å›¾å·²æ„å»ºï¼Œä½¿ç”¨å­å›¾è¯„åˆ† ==========
     if (!curSubgraph.tokens.empty() && !curSubgraph.tokens.count(targetTid)) {
-        return 0;  // ²»ÔÚ×ÓÍ¼ÖĞµÄtokenµÃ·ÖÎª0
+        return 0;  // ä¸åœ¨å­å›¾ä¸­çš„tokenå¾—åˆ†ä¸º0
     }
 
     int score = globalAttention(ctx, targetTid);
@@ -3104,7 +3232,7 @@ int BrainCortex::calcScore(const vector<int>& ctx, int targetTid, TextTokenizer&
         score += 20;
     }
 
-    // ========== ĞÂÔö£ºÎ»ÖÃ¹ì¼£´ò·Ö ==========
+    // ========== æ–°å¢ï¼šä½ç½®è½¨è¿¹æ‰“åˆ† ==========
     if (!ctx.empty()) {
         ContextSnapshot currentSnap;
         int lastToken = ctx.back();
@@ -3126,13 +3254,13 @@ int BrainCortex::calcScore(const vector<int>& ctx, int targetTid, TextTokenizer&
 
     score += calcTemplateScore(ctx, targetTid, token);
 
-    // ========== ĞŞ¸Ä£º´ÊĞÔÓ²±àÂë¼Ó·Ö£¨Ê¹ÓÃ token.getPosForToken »ñÈ¡´ÊĞÔ£© ==========
+    // ========== ä¿®æ”¹ï¼šè¯æ€§ç¡¬ç¼–ç åŠ åˆ†ï¼ˆä½¿ç”¨ token.getPosForToken è·å–è¯æ€§ï¼‰ ==========
     if (!ctx.empty()) {
         int last = ctx.back();
         AutoPosType lastPos = token.getPosForToken(last);
         AutoPosType curPos = token.getPosForToken(targetTid);
 
-        // ´ÊĞÔ×éºÏÓ²±àÂë¹æÔò
+        // è¯æ€§ç»„åˆç¡¬ç¼–ç è§„åˆ™
         if (lastPos == POS_NOUN && curPos == POS_AUX) {
             score += 60;
         } else if (lastPos == POS_AUX && curPos == POS_NOUN) {
@@ -3162,7 +3290,7 @@ int BrainCortex::calcFluency(const vector<int>& seq,TextTokenizer& token){
         string c=chars[i], p=chars[i-1];
         if(token.isPunctuation(c) && token.isPunctuation(p)) flu-=hp.PUNCT_DUPLICATE_PENALTY;
         else{
-            unordered_set<string> aux={"µÄ","ÊÇ","ÁË","Ò²","¾Í","¶¼","Òª","ÔÚ"};
+            unordered_set<string> aux={"çš„","æ˜¯","äº†","ä¹Ÿ","å°±","éƒ½","è¦","åœ¨"};
             if(!token.isPunctuation(c) && c==p && !aux.count(c)){ flu-=hp.CHAR_DUPLICATE_PENALTY; if(i>=2 && chars[i-2]==c) flu-=hp.CHAR_DUPLICATE_PENALTY*2; }
         }
     }
@@ -3173,7 +3301,7 @@ int BrainCortex::calcFluency(const vector<int>& seq,TextTokenizer& token){
 
 bool BrainCortex::checkConsistency(const vector<int>& seq, TextTokenizer& token) {
     static unordered_map<string, string> antonymMap = {
-        {"¸ß", "°«"}, {"´ó", "Ğ¡"}, {"ºÃ", "»µ"}, {"ÈÈ", "Àä"}, {"¶à", "ÉÙ"}
+        {"é«˜", "çŸ®"}, {"å¤§", "å°"}, {"å¥½", "å"}, {"çƒ­", "å†·"}, {"å¤š", "å°‘"}
     };
     unordered_set<string> statements;
     for (size_t i = 0; i + 2 < seq.size(); i++) {
@@ -3297,7 +3425,7 @@ void BrainCortex::addRandomNeuron() {
             layers[bestLayer][targetIdx].linkIn(nid);
         }
     }
-    cout << "[¿É±äÍØÆË] ĞÂÔöÉñ¾­Ôª " << nid << " ÔÚµÚ " << bestLayer << " ²ã" << endl;
+    cout << "[å¯å˜æ‹“æ‰‘] æ–°å¢ç¥ç»å…ƒ " << nid << " åœ¨ç¬¬ " << bestLayer << " å±‚" << endl;
     rebuildLayerIndex();
 }
 
@@ -3315,7 +3443,7 @@ void BrainCortex::maybeSplitLayer() {
                 layers[newLayerIdx].push_back(neu);
             }
             layers[l].erase(layers[l].begin()+mid, layers[l].end());
-            cout << "[¿É±äÍØÆË] ²ã " << l << " ·ÖÁÑ£¬ĞÂÔö²ã " << newLayerIdx << endl;
+            cout << "[å¯å˜æ‹“æ‰‘] å±‚ " << l << " åˆ†è£‚ï¼Œæ–°å¢å±‚ " << newLayerIdx << endl;
             for (auto& fromNeu : layers[l]) {
                 for (int k=0; k<3; k++) {
                     int targetIdx = rand() % layers[newLayerIdx].size();
@@ -3364,7 +3492,7 @@ void BrainCortex::rewiring() {
         }
         if (rewired >= hp.REWIRING_EDGES) break;
     }
-    if (rewired>0) cout << "[¿É±äÍØÆË] ÖØÅäÁË " << rewired << " ÌõµÍÖØÒªĞÔ±ß" << endl;
+    if (rewired>0) cout << "[å¯å˜æ‹“æ‰‘] é‡é…äº† " << rewired << " æ¡ä½é‡è¦æ€§è¾¹" << endl;
 }
 
 void BrainCortex::maybeMutateTopology(int lastQuality) {
@@ -3377,7 +3505,7 @@ void BrainCortex::maybeMutateTopology(int lastQuality) {
     if (generationCounter % 10 == 0) maybeSplitLayer();
     if (generationCounter % hp.REWIRING_INTERVAL == 0) rewiring();
 }
-// ========== ×ÔÎÒÄ£ĞÍÊµÏÖ ==========
+// ========== è‡ªæˆ‘æ¨¡å‹å®ç° ==========
 void BrainCortex::initSelfModel() {
     selfNeurons.clear();
     auto add = [this](const string& name, float initVal=0.0f) {
@@ -3391,8 +3519,8 @@ void BrainCortex::initSelfModel() {
     add("TopoChangeRate");
     add("ShortMemNovelty");
     add("PredictionErrorGlobal");
-    add("SurpriseAvg");          // ========== ĞÂÔö ==========
-    add("ErrorTrend");           // ========== ĞÂÔö ==========
+    add("SurpriseAvg");          // ========== æ–°å¢ ==========
+    add("ErrorTrend");           // ========== æ–°å¢ ==========
     while((int)selfNeurons.size() < hp.SELF_NEURON_COUNT) add("Extra");
 }
 
@@ -3424,7 +3552,7 @@ void BrainCortex::updateSelfModel(int lastQuality, float inferenceConf, float to
     setSelfValue("PredictionErrorGlobal", avgPredictionError);
     setSelfValue("SurpriseAvg", avgSurprise);
     
-    // ¼ÆËãÎó²îÇ÷ÊÆ
+    // è®¡ç®—è¯¯å·®è¶‹åŠ¿
     if (predictionHistory.size() > 10) {
         float recent = 0, old = 0;
         int n = predictionHistory.size();
@@ -3447,7 +3575,7 @@ void BrainCortex::updateSelfModel(int lastQuality, float inferenceConf, float to
     setSelfValue("PredictionErrorGlobal", avgPredictionError);
 }
 
-// ========== Á½»·¿ØÖÆÆ÷ ==========
+// ========== ä¸¤ç¯æ§åˆ¶å™¨ ==========
 void BrainCortex::updateTwoLoopController(int quality) {
     T_history.push_back(T); if (T_history.size()>5) T_history.pop_front();
     E_history.push_back(E); if (E_history.size()>5) E_history.pop_front();
@@ -3485,26 +3613,26 @@ string BrainCortex::generateConsciousReport() {
     float novelty = getSelfValue("ShortMemNovelty");
     float errorTrend = getSelfValue("ErrorTrend");
     
-    if(avgAct < 15.0f) report += "ÎÒ¸Ğµ½Æ¤²ã³Á¼Å£¬Ë¼Î¬²»»îÔ¾¡£";
-    else if(avgAct > 60.0f) report += "ÎÒ¸Ğµ½Ë¼Î¬¸ß¶È»îÔ¾¡£";
+    if(avgAct < 15.0f) report += "æˆ‘æ„Ÿåˆ°çš®å±‚æ²‰å¯‚ï¼Œæ€ç»´ä¸æ´»è·ƒã€‚";
+    else if(avgAct > 60.0f) report += "æˆ‘æ„Ÿåˆ°æ€ç»´é«˜åº¦æ´»è·ƒã€‚";
     
-    if(quality < 30.0f) report += "ÎÒ¶Ô×Ô¼º×î½üµÄÉú³ÉÖÊÁ¿ºÜ²»ÂúÒâ¡£";
-    else if(quality > 70.0f) report += "ÎÒ¶Ô×Ô¼º×î½üµÄÊä³ö¸Ğµ½ÂúÒâ¡£";
+    if(quality < 30.0f) report += "æˆ‘å¯¹è‡ªå·±æœ€è¿‘çš„ç”Ÿæˆè´¨é‡å¾ˆä¸æ»¡æ„ã€‚";
+    else if(quality > 70.0f) report += "æˆ‘å¯¹è‡ªå·±æœ€è¿‘çš„è¾“å‡ºæ„Ÿåˆ°æ»¡æ„ã€‚";
     
-    if(emotion > 70.0f) report += "ÎÒÇéĞ÷¸ßÕÇ¡£";
-    else if(emotion < 20.0f) report += "ÎÒÇéĞ÷µÍÂä¡£";
+    if(emotion > 70.0f) report += "æˆ‘æƒ…ç»ªé«˜æ¶¨ã€‚";
+    else if(emotion < 20.0f) report += "æˆ‘æƒ…ç»ªä½è½ã€‚";
     
-    if(predErr > hp.PREDICTION_ERROR_THRESH) report += "ÎÒ¶ÔÎ´À´µÄÔ¤²âºÜ²»È·¶¨£¬ÄÚĞÄÀ§»ó¡£";
+    if(predErr > hp.PREDICTION_ERROR_THRESH) report += "æˆ‘å¯¹æœªæ¥çš„é¢„æµ‹å¾ˆä¸ç¡®å®šï¼Œå†…å¿ƒå›°æƒ‘ã€‚";
     
-    // ========== ĞÂÔö£ºÔ¤²âÎó²î±¨¸æ ==========
-    if(surprise > 4.0f) report += "ÎÒ¾­³£¸Ğµ½ÒâÍâ£¬ÊÀ½ç±ÈÎÒÏëÏóµÄ¸´ÔÓ¡£";
-    else if(surprise < 0.3f) report += "Ò»ÇĞ¶¼Ì«¿ÉÔ¤²âÁË£¬ÓĞĞ©ÎŞÁÄ¡£";
+    // ========== æ–°å¢ï¼šé¢„æµ‹è¯¯å·®æŠ¥å‘Š ==========
+    if(surprise > 4.0f) report += "æˆ‘ç»å¸¸æ„Ÿåˆ°æ„å¤–ï¼Œä¸–ç•Œæ¯”æˆ‘æƒ³è±¡çš„å¤æ‚ã€‚";
+    else if(surprise < 0.3f) report += "ä¸€åˆ‡éƒ½å¤ªå¯é¢„æµ‹äº†ï¼Œæœ‰äº›æ— èŠã€‚";
     
-    if(errorTrend > 2.0f) report += "ÎÒ×¢Òâµ½Ô¤²âÎó²îÔÚÉÏÉı£¬ĞèÒªµ÷ÕûÈÏÖª¡£";
-    else if(errorTrend < -2.0f) report += "ÎÒ¶ÔÊÀ½çµÄÀí½âÔ½À´Ô½×¼È·ÁË¡£";
+    if(errorTrend > 2.0f) report += "æˆ‘æ³¨æ„åˆ°é¢„æµ‹è¯¯å·®åœ¨ä¸Šå‡ï¼Œéœ€è¦è°ƒæ•´è®¤çŸ¥ã€‚";
+    else if(errorTrend < -2.0f) report += "æˆ‘å¯¹ä¸–ç•Œçš„ç†è§£è¶Šæ¥è¶Šå‡†ç¡®äº†ã€‚";
     
-    if(novelty > 60.0f) report += "ÎÒ×¢Òâµ½¶ÌÊ±¼ÇÒäÖĞ³öÏÖÁËºÜ¶àĞÂÆæµÄ´Ê»ã¡£";
-    if(report.empty()) report = "ÎÒ¸Ğ¾õÆ½¾²£¬Ò»ÇĞÕı³£¡£";
+    if(novelty > 60.0f) report += "æˆ‘æ³¨æ„åˆ°çŸ­æ—¶è®°å¿†ä¸­å‡ºç°äº†å¾ˆå¤šæ–°å¥‡çš„è¯æ±‡ã€‚";
+    if(report.empty()) report = "æˆ‘æ„Ÿè§‰å¹³é™ï¼Œä¸€åˆ‡æ­£å¸¸ã€‚";
     return report;
 }
 bool BrainCortex::hasGoal(const string& desc) {
@@ -3522,15 +3650,15 @@ void BrainCortex::generateInnerGoals() {
     float quality = getSelfValue("QualitySliding");
     if(predErr > 40.0f && !hasGoal("reduce_prediction_error")) {
         innerGoals.push_back({"reduce_prediction_error", -1, 0.0f, stepCounter, true});
-        cout << "[ÒâÊ¶] ÎÒÉè¶¨Ä¿±ê£º½µµÍÔ¤²âÎó²î¡£" << endl;
+        cout << "[æ„è¯†] æˆ‘è®¾å®šç›®æ ‡ï¼šé™ä½é¢„æµ‹è¯¯å·®ã€‚" << endl;
     }
     if(quality < 40.0f && !hasGoal("improve_quality")) {
         innerGoals.push_back({"improve_quality", -1, 0.0f, stepCounter, true});
-        cout << "[ÒâÊ¶] ÎÒÉè¶¨Ä¿±ê£ºÌá¸ßÊä³öÖÊÁ¿¡£" << endl;
+        cout << "[æ„è¯†] æˆ‘è®¾å®šç›®æ ‡ï¼šæé«˜è¾“å‡ºè´¨é‡ã€‚" << endl;
     }
     if(novelty < 30.0f && !hasGoal("explore_novelty")) {
         innerGoals.push_back({"explore_novelty", -1, 0.0f, stepCounter, true});
-        cout << "[ÒâÊ¶] ÎÒÉè¶¨Ä¿±ê£ºÔö¼Ó´Ê»ãĞÂÓ±¶È¡£" << endl;
+        cout << "[æ„è¯†] æˆ‘è®¾å®šç›®æ ‡ï¼šå¢åŠ è¯æ±‡æ–°é¢–åº¦ã€‚" << endl;
     }
 }
 
@@ -3538,11 +3666,11 @@ void BrainCortex::consciousBroadcast() {
     string report = generateConsciousReport();
     if(report != lastConsciousReport && (stepCounter % hp.CONSCIOUSNESS_REPORT_INTERVAL == 0)) {
         lastConsciousReport = report;
-        cout << "[ÒâÊ¶ÄÚÊ¡] " << report << endl;
+        cout << "[æ„è¯†å†…çœ] " << report << endl;
     }
 }
 
-// ========== ×¢ÒâÁ¦×ÓÍ¼ ==========
+// ========== æ³¨æ„åŠ›å­å›¾ ==========
 void BrainCortex::buildAttentionSubgraph(const vector<int>& ctx, TextTokenizer& token) {
     lock_guard<recursive_mutex> lock(cortexMtx);
     curSubgraph.clear();
@@ -3584,26 +3712,26 @@ int BrainCortex::calcScoreSubgraph(const vector<int>& ctx, int targetTid, TextTo
 }
 
 void BrainCortex::offlineConsolidation(TextTokenizer& token, int maxSeconds) {
-    cout << "[ĞİÃß] ½øÈëÀëÏß¹®¹ÌÄ£Ê½..." << endl;
+    cout << "[ä¼‘çœ ] è¿›å…¥ç¦»çº¿å·©å›ºæ¨¡å¼..." << endl;
     auto startTime = chrono::steady_clock::now();
     int iteration = 0;
     while (true) {
         this_thread::sleep_for(chrono::seconds(10));
         if (userInputWaiting) {
-            cout << "[ĞİÃß] ¼ì²âµ½ÓÃ»§ÊäÈë£¬Á¢¼´»½ĞÑ¡£" << endl;
+            cout << "[ä¼‘çœ ] æ£€æµ‹åˆ°ç”¨æˆ·è¾“å…¥ï¼Œç«‹å³å”¤é†’ã€‚" << endl;
             break;
         }
         auto elapsed = chrono::duration_cast<chrono::seconds>(
             chrono::steady_clock::now() - startTime).count();
         if (elapsed >= maxSeconds) {
-            cout << "[ĞİÃß] ´ïµ½×î´ó¹®¹ÌÊ±¼ä£¬ÍË³ö¡£" << endl;
+            cout << "[ä¼‘çœ ] è¾¾åˆ°æœ€å¤§å·©å›ºæ—¶é—´ï¼Œé€€å‡ºã€‚" << endl;
             break;
         }
         
         lock_guard<recursive_mutex> lock(cortexMtx);
         switch (iteration % 4) {
             case 0:
-                // Ñ¹ËõÇé½Ú¼ÇÒä
+                // å‹ç¼©æƒ…èŠ‚è®°å¿†
                 if (episodicMemory.size() > 100) {
                     vector<Episode> kept;
                     for (auto& ep : episodicMemory) {
@@ -3611,22 +3739,22 @@ void BrainCortex::offlineConsolidation(TextTokenizer& token, int maxSeconds) {
                         if (kept.size() >= 50) break;
                     }
                     episodicMemory = deque<Episode>(kept.begin(), kept.end());
-                    cout << "[ĞİÃß] Çé½Ú¼ÇÒäÑ¹ËõÖÁ " << episodicMemory.size() << " Ìõ¡£" << endl;
+                    cout << "[ä¼‘çœ ] æƒ…èŠ‚è®°å¿†å‹ç¼©è‡³ " << episodicMemory.size() << " æ¡ã€‚" << endl;
                 }
                 break;
             case 1:
                 pruneWeakNodes();
                 updateAllLayers();
-                cout << "[ĞİÃß] Ö´ĞĞÁËÈõÁ¬½ÓĞŞ¼ô¡£" << endl;
+                cout << "[ä¼‘çœ ] æ‰§è¡Œäº†å¼±è¿æ¥ä¿®å‰ªã€‚" << endl;
                 break;
             case 2:
                 autoInduceRelationsLocked(token);
-                cout << "[ĞİÃß] ×Ô¶¯¹éÄÉÂß¼­¹ØÏµ¡£" << endl;
+                cout << "[ä¼‘çœ ] è‡ªåŠ¨å½’çº³é€»è¾‘å…³ç³»ã€‚" << endl;
                 break;
             case 3:
-                // ========== ĞÂÔö£ºÈ«¾ÖÎó²îÕûºÏ ==========
+                // ========== æ–°å¢ï¼šå…¨å±€è¯¯å·®æ•´åˆ ==========
                 integrateGlobalPredictionError();
-                cout << "[ĞİÃß] ÕûºÏÈ«¾ÖÔ¤²âÎó²î£¬avgSurprise=" << avgSurprise << endl;
+                cout << "[ä¼‘çœ ] æ•´åˆå…¨å±€é¢„æµ‹è¯¯å·®ï¼ŒavgSurprise=" << avgSurprise << endl;
                 break;
         }
         iteration++;
@@ -3634,7 +3762,7 @@ void BrainCortex::offlineConsolidation(TextTokenizer& token, int maxSeconds) {
     curSubgraph.clear();
 }
 
-// ========== Ä£°åÀà±ÈºÍÆÀ·Ö ==========
+// ========== æ¨¡æ¿ç±»æ¯”å’Œè¯„åˆ† ==========
 int BrainCortex::calcTemplateScore(const vector<int>& ctx, int candidate, TextTokenizer& token) {
     if (ctx.empty()) return 0;
     int score = 0;
@@ -3700,11 +3828,11 @@ vector<int> BrainCortex::analogicalGenerate(const vector<int>& context, TextToke
 }
 
 // ============================================================
-//  ËÄºË¼Ü¹¹£ºÈı¸öÆÀ·ÖºË + ÔªºË
+//  å››æ ¸æ¶æ„ï¼šä¸‰ä¸ªè¯„åˆ†æ ¸ + å…ƒæ ¸
 // ============================================================
 
 // ============================================================
-//  1. Âß¼­ºË£º°üº¬Âß¼­¹ØÏµ¡¢´ÊĞÔ¡¢Ä¿±êÒâÍ¼¡¢Âß¼­Ãªµã¡¢Ò»ÖÂĞÔ
+//  1. é€»è¾‘æ ¸ï¼šåŒ…å«é€»è¾‘å…³ç³»ã€è¯æ€§ã€ç›®æ ‡æ„å›¾ã€é€»è¾‘é”šç‚¹ã€ä¸€è‡´æ€§
 // ============================================================
 std::unordered_map<int, int> BrainCortex::calcLogicScore(const std::vector<int>& ctx, TextTokenizer& token) {
 	lock_guard<recursive_mutex> lock(cortexMtx);
@@ -3714,7 +3842,7 @@ std::unordered_map<int, int> BrainCortex::calcLogicScore(const std::vector<int>&
     Neuron* neu = findNeuronByToken(last);
     if (!neu) return scores;
 
-    // »ù´¡Âß¼­±ß
+    // åŸºç¡€é€»è¾‘è¾¹
     for (auto& edge : neu->outputs) {
         int tid = edge.target;
         if (tid <= 3) continue;
@@ -3722,7 +3850,7 @@ std::unordered_map<int, int> BrainCortex::calcLogicScore(const std::vector<int>&
         if (edge.logic != LOGIC_NONE) sc += 30;
         if (isLogicalConsistent(last, tid, edge.logic, ctx, token)) sc += 10;
 
-        // ---------- Óï¾³Æ¥Åä¼Ó·Ö ----------
+        // ---------- è¯­å¢ƒåŒ¹é…åŠ åˆ† ----------
         ContextSnapshot snap;
         if (!ctx.empty()) {
             snap.prevToken = (ctx.size() >= 2) ? ctx[ctx.size()-2] : -1;
@@ -3745,8 +3873,8 @@ std::unordered_map<int, int> BrainCortex::calcLogicScore(const std::vector<int>&
         scores[tid] += sc;
     }
 
-    // ´ÊĞÔÔ¼Êø¡¢Ä¿±ê¡¢Ãªµã
-        // ---------- ´ÊĞÔ×éºÏÓ²±àÂë£¨ÍêÕû 8 Ìõ£¬º¬ NOUN+AUX ºÍ AUX+NOUN£© ----------
+    // è¯æ€§çº¦æŸã€ç›®æ ‡ã€é”šç‚¹
+        // ---------- è¯æ€§ç»„åˆç¡¬ç¼–ç ï¼ˆå®Œæ•´ 8 æ¡ï¼Œå« NOUN+AUX å’Œ AUX+NOUNï¼‰ ----------
     AutoPosType lastPos = (last >= 0 && last < (int)token.tokenPosCache.size()) ? token.tokenPosCache[last] : POS_UNKNOWN;
     for (auto& kv : scores) {
         int tid = kv.first;
@@ -3771,13 +3899,13 @@ std::unordered_map<int, int> BrainCortex::calcLogicScore(const std::vector<int>&
 }
 
 // ============================================================
-//  2. ÁªÏëºË£º°üº¬¼¤»îÀ©É¢¡¢Ç¶ÈëÏàËÆ¶È¡¢È«¾Ö¹¤×÷¿Õ¼ä¡¢³¤ÆÚ¼ÇÒä¡¢ÖªÊ¶¸ÅÄî
+//  2. è”æƒ³æ ¸ï¼šåŒ…å«æ¿€æ´»æ‰©æ•£ã€åµŒå…¥ç›¸ä¼¼åº¦ã€å…¨å±€å·¥ä½œç©ºé—´ã€é•¿æœŸè®°å¿†ã€çŸ¥è¯†æ¦‚å¿µ
 // ============================================================
 std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>& ctx, TextTokenizer& token) {
 	lock_guard<recursive_mutex> lock(cortexMtx);
     std::unordered_map<int, int> scores;
 
-    // ¼¤»î´«²¥
+    // æ¿€æ´»ä¼ æ’­
     for (int nid : curSubgraph.neurons) {
         Neuron* neu = findNeuronById(nid);
         if (!neu || neu->activation == 0) continue;
@@ -3787,7 +3915,7 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
 
             int sc = edge.total() * neu->activation / 5;
 
-            // Óï¾³Æ¥Åä
+            // è¯­å¢ƒåŒ¹é…
             ContextSnapshot snap;
             if (!ctx.empty()) {
                 int curTok = ctx.back();
@@ -3829,7 +3957,7 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
         }
     }
 
-    // ¶ÌÊ±¼ÇÒä±ß±éÀú
+    // çŸ­æ—¶è®°å¿†è¾¹éå†
     for (int t : shortMemory) {
         for (auto& layer : layers) {
             for (auto& p : layer) {
@@ -3844,7 +3972,7 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
         }
     }
 
-    // Çé¸ĞÄÜÁ¿ + ³ÉÊì¶È
+    // æƒ…æ„Ÿèƒ½é‡ + æˆç†Ÿåº¦
     for (auto& layer : layers) {
         for (auto& p : layer) {
             for (int tid : p.boundTokens) {
@@ -3855,14 +3983,14 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
         }
     }
 
-    // È«¾Ö¹¤×÷¿Õ¼ä
+    // å…¨å±€å·¥ä½œç©ºé—´
     vector<int> topWorkspace = workspace.getTop(3);
     for (int tid : topWorkspace) {
         if (scores.count(tid)) scores[tid] += 20;
         else scores[tid] = 20;
     }
 
-    // ³¤ÆÚÎÄ±¾¼ÇÒä
+    // é•¿æœŸæ–‡æœ¬è®°å¿†
     for (auto& seg : longTextMemory) {
         for (int t : seg) {
             if (scores.count(t)) scores[t] += 2;
@@ -3874,13 +4002,13 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
         else scores[t] = 1;
     }
 
-    // ÖªÊ¶¸ÅÄî
+    // çŸ¥è¯†æ¦‚å¿µ
     for (int cid : knowledgeConcepts) {
         if (scores.count(cid)) scores[cid] += 15;
         else scores[cid] = 15;
     }
 
-    // Ç¶ÈëÏàËÆ¶È
+    // åµŒå…¥ç›¸ä¼¼åº¦
     if (!ctx.empty()) {
         std::vector<float> ctxEmb(token.EMBED_DIM, 0.0f);
         int cnt = 0;
@@ -3903,7 +4031,7 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
         }
     }
 
-    // ·ç¸ñµ÷ÖÆ
+    // é£æ ¼è°ƒåˆ¶
     if (curStyle == STYLE_EMOTION) {
         for (auto& kv : scores) kv.second = kv.second * 12 / 10;
     } else if (curStyle == STYLE_SIMPLE) {
@@ -3914,13 +4042,13 @@ std::unordered_map<int, int> BrainCortex::calcAssocScore(const std::vector<int>&
 }
 
 // ============================================================
-//  3. ½±³ÍºË£º°üº¬Á÷³©¶È±ä»¯¡¢Çé¸ĞÄÜÁ¿¡¢Éñ¾­Ôª³ÉÊì¶È¡¢Ä£°åÆ¥Åä
+//  3. å¥–æƒ©æ ¸ï¼šåŒ…å«æµç•…åº¦å˜åŒ–ã€æƒ…æ„Ÿèƒ½é‡ã€ç¥ç»å…ƒæˆç†Ÿåº¦ã€æ¨¡æ¿åŒ¹é…
 // ============================================================
 std::unordered_map<int, int> BrainCortex::calcRewardScore(const std::vector<int>& ctx, TextTokenizer& token) {
 	lock_guard<recursive_mutex> lock(cortexMtx);
     std::unordered_map<int, int> scores;
 
-    // TD ²î·Ö
+    // TD å·®åˆ†
     if (stepFluency.size() >= 2) {
         int currentFlu = calcFluency(ctx, token);
         int prevFlu = stepFluency.back();
@@ -3938,10 +4066,10 @@ std::unordered_map<int, int> BrainCortex::calcRewardScore(const std::vector<int>
         }
     }
 
-    // Çé¸ĞÒò×Ó£¨ÓÃÓÚÎÂ¶Èµ÷½Ú£©
+    // æƒ…æ„Ÿå› å­ï¼ˆç”¨äºæ¸©åº¦è°ƒèŠ‚ï¼‰
     float emotionFactor = (curEmo.intensity > 60) ? 1.5f : (curEmo.intensity < 5 ? 0.6f : 1.0f);
 
-    // Ä£°åÆÀ·Ö
+    // æ¨¡æ¿è¯„åˆ†
     if (!ctx.empty()) {
         int last = ctx.back();
         Neuron* neu = findNeuronByToken(last);
@@ -3959,41 +4087,41 @@ std::unordered_map<int, int> BrainCortex::calcRewardScore(const std::vector<int>
 }
 
 // ============================================================
-//  ĞÂµÄËÄºË singleGenerate
+//  æ–°çš„å››æ ¸ singleGenerate
 // ============================================================
 vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
-    logger.logDebug("singleGenerate ¿ªÊ¼, ctx.size=" + to_string(ctx.size()));
+    logger.logDebug("singleGenerate å¼€å§‹, ctx.size=" + to_string(ctx.size()));
     
     buildAttentionSubgraph(ctx, token);
-    logger.logDebug("buildAttentionSubgraph Íê³É");
+    logger.logDebug("buildAttentionSubgraph å®Œæˆ");
     
     layerForwardPass(token);
-    logger.logDebug("layerForwardPass Íê³É");
+    logger.logDebug("layerForwardPass å®Œæˆ");
     
     for (auto& lay : layers) {
         for (auto& neu : lay) {
             neu.activate();
         }
     }
-    logger.logDebug("activate Íê³É");
+    logger.logDebug("activate å®Œæˆ");
     
     clearStepRecords();
-    logger.logDebug("clearStepRecords Íê³É");
+    logger.logDebug("clearStepRecords å®Œæˆ");
 
-    unordered_set<string> aux = { "µÄ","Ò»","ÊÇ","ÁË","Ò²","¾Í","¶¼","Òª","ÔÚ","ºÍ","ÓĞ","Õâ","ÄÇ" };
+    unordered_set<string> aux = { "çš„","ä¸€","æ˜¯","äº†","ä¹Ÿ","å°±","éƒ½","è¦","åœ¨","å’Œ","æœ‰","è¿™","é‚£" };
 
     int step = 0;
     for (; step < hp.MAX_GEN_STEP; ++step) {
-        logger.logDebug("Ö÷Ñ­»·µÚ " + to_string(step) + " ²½¿ªÊ¼");
+        logger.logDebug("ä¸»å¾ªç¯ç¬¬ " + to_string(step) + " æ­¥å¼€å§‹");
         
         updateGains(ctx, token);
-        logger.logDebug("updateGains Íê³É");
+        logger.logDebug("updateGains å®Œæˆ");
 
         // ============================================================
-        // 1. ÈıºË²¢ĞĞÆÀ·Ö
+        // 1. ä¸‰æ ¸å¹¶è¡Œè¯„åˆ†
         // ============================================================
-        logger.logDebug("¿ªÊ¼²¢ĞĞÆÀ·Ö...");
-		// ¸Ä³É£º
+        logger.logDebug("å¼€å§‹å¹¶è¡Œè¯„åˆ†...");
+		// æ”¹æˆï¼š
 		std::unordered_map<int, int> logicScores, assocScores, rewardScores;
 		#pragma omp parallel sections
 		{
@@ -4019,12 +4147,12 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
 		        }
 		    }
 		}
-        logger.logDebug("ÆÀ·ÖÍê³É, logic=" + to_string(logicScores.size()) + 
+        logger.logDebug("è¯„åˆ†å®Œæˆ, logic=" + to_string(logicScores.size()) + 
                         ", assoc=" + to_string(assocScores.size()) +
                         ", reward=" + to_string(rewardScores.size()));
 
         // ============================================================
-        // 2. ½»²æÑéÖ¤
+        // 2. äº¤å‰éªŒè¯
         // ============================================================
         auto getTopK = [](const std::unordered_map<int, int>& scores, int k) {
             std::vector<std::pair<int, int>> vec(scores.begin(), scores.end());
@@ -4036,7 +4164,7 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
         std::vector<int> topL = getTopK(logicScores, 10);
         std::vector<int> topA = getTopK(assocScores, 10);
         std::vector<int> topR = getTopK(rewardScores, 10);
-        logger.logDebug("getTopK Íê³É");
+        logger.logDebug("getTopK å®Œæˆ");
 
         auto crossValidate = [](std::unordered_map<int, int>& self,
                                 const std::unordered_map<int, int>& other,
@@ -4063,10 +4191,10 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
         crossValidate(assocScores, rewardScores, topR, 0.2f);
         crossValidate(rewardScores, logicScores, topL, 0.5f);
         crossValidate(rewardScores, assocScores, topA, 0.3f);
-        logger.logDebug("½»²æÑéÖ¤Íê³É");
+        logger.logDebug("äº¤å‰éªŒè¯å®Œæˆ");
 
         // ============================================================
-        // 3. ÈÚºÏËùÓĞºòÑ¡
+        // 3. èåˆæ‰€æœ‰å€™é€‰
         // ============================================================
         std::unordered_set<int> allTokens;
         for (auto& kv : logicScores) allTokens.insert(kv.first);
@@ -4097,15 +4225,15 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
                 candAll.emplace_back(tid, sc);
             }
         }
-        logger.logDebug("ÈÚºÏÍê³É, candAll.size=" + to_string(candAll.size()));
+        logger.logDebug("èåˆå®Œæˆ, candAll.size=" + to_string(candAll.size()));
 
         // ============================================================
-		// 4. ËÀËø´¦Àí
+		// 4. æ­»é”å¤„ç†
 		// ============================================================
 		if (candAll.empty()) {
-		    logger.logDebug("candAll Îª¿Õ£¬½øÈëËÀËø´¦Àí");
+		    logger.logDebug("candAll ä¸ºç©ºï¼Œè¿›å…¥æ­»é”å¤„ç†");
 		    
-		    // ³¢ÊÔ1£ºÀà±ÈÉú³É
+		    // å°è¯•1ï¼šç±»æ¯”ç”Ÿæˆ
 		    vector<int> analog = analogicalGenerate(ctx, token);
 		    if (!analog.empty()) {
 		        for (int tid : analog) {
@@ -4116,34 +4244,34 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
 		        }
 		    }
 		    
-		    // ³¢ÊÔ2£ºÈç¹ûÀà±ÈÊ§°Ü£¬ÓÃËæ»úºòÑ¡
+		    // å°è¯•2ï¼šå¦‚æœç±»æ¯”å¤±è´¥ï¼Œç”¨éšæœºå€™é€‰
 		    if (candAll.empty()) {
 		        deadlockCounter++;
 		        
-		        // Èç¹ûÁ¬ĞøËÀËøÌ«¶à£¬Ç¿ÖÆÍË³ö
+		        // å¦‚æœè¿ç»­æ­»é”å¤ªå¤šï¼Œå¼ºåˆ¶é€€å‡º
 		        if (deadlockCounter >= DEADLOCK_THRESHOLD) {
-		            logger.logDebug("ËÀËø´ïµ½ãĞÖµ£¬ÍË³ö");
+		            logger.logDebug("æ­»é”è¾¾åˆ°é˜ˆå€¼ï¼Œé€€å‡º");
 		            break;
 		        }
 		        
-		        // µ÷Õû²ÎÊı£¨³¢ÊÔ´òÆÆ½©¾Ö£©
+		        // è°ƒæ•´å‚æ•°ï¼ˆå°è¯•æ‰“ç ´åƒµå±€ï¼‰
 		        alpha_L += 0.15f;
 		        alpha_A += 0.10f;
 		        alpha_R -= 0.10f;
 		        
-		        // Éú³ÉËæ»úºòÑ¡
+		        // ç”Ÿæˆéšæœºå€™é€‰
 		        int randomTid = -1;
 		        if (token.vocabList.size() > 4) {
 		            int attempts = 0;
 		            while (attempts < 100) {
 		                randomTid = 4 + (rand() % (token.vocabList.size() - 4));
-		                // ±ÜÃâÑ¡µ½ÒÑ¾­ÔÚÉÏÏÂÎÄÖĞµÄ token
+		                // é¿å…é€‰åˆ°å·²ç»åœ¨ä¸Šä¸‹æ–‡ä¸­çš„ token
 		                if (randomTid > 3 && !ctxFreq.count(randomTid)) {
 		                    break;
 		                }
 		                attempts++;
 		            }
-		            // Èç¹û 100 ´Î¶¼ÕÒ²»µ½²»ÖØ¸´µÄ£¬Ëæ±ãÑ¡Ò»¸ö
+		            // å¦‚æœ 100 æ¬¡éƒ½æ‰¾ä¸åˆ°ä¸é‡å¤çš„ï¼Œéšä¾¿é€‰ä¸€ä¸ª
 		            if (attempts >= 100) {
 		                randomTid = 4 + (rand() % (token.vocabList.size() - 4));
 		            }
@@ -4154,22 +4282,22 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
 		        if (randomTid > 3 && randomTid < (int)token.vocabList.size()) {
 		            int sc = calcScore(ctx, randomTid, token) + 10;
 		            candAll.emplace_back(randomTid, sc);
-		            logger.logDebug("Ëæ»úºòÑ¡Éú³É: " + token.vocabList[randomTid]);
+		            logger.logDebug("éšæœºå€™é€‰ç”Ÿæˆ: " + token.vocabList[randomTid]);
 		        }
 		    }
 		}
 		
-		// Èç¹û candAll ÈÔÈ»Îª¿Õ£¬ËµÃ÷ÏµÍ³³¹µ×ÎŞ·¨Éú³É
+		// å¦‚æœ candAll ä»ç„¶ä¸ºç©ºï¼Œè¯´æ˜ç³»ç»Ÿå½»åº•æ— æ³•ç”Ÿæˆ
 		if (candAll.empty()) {
-		    logger.logError("ÎŞ·¨Éú³ÉÈÎºÎºòÑ¡£¬Ç¿ÖÆ½áÊø±¾ÂÖÉú³É");
+		    logger.logError("æ— æ³•ç”Ÿæˆä»»ä½•å€™é€‰ï¼Œå¼ºåˆ¶ç»“æŸæœ¬è½®ç”Ÿæˆ");
 		    break;
 		}
 		
-		// Ö»ÓĞÔÚ³É¹¦Éú³ÉºòÑ¡Ê±²ÅÖØÖÃËÀËø¼ÆÊıÆ÷
+		// åªæœ‰åœ¨æˆåŠŸç”Ÿæˆå€™é€‰æ—¶æ‰é‡ç½®æ­»é”è®¡æ•°å™¨
 		deadlockCounter = 0;
-		logger.logDebug("ËÀËø´¦ÀíÍê³É£¬ºòÑ¡Êı: " + to_string(candAll.size()));
+		logger.logDebug("æ­»é”å¤„ç†å®Œæˆï¼Œå€™é€‰æ•°: " + to_string(candAll.size()));
         // ============================================================
-        // 5. ĞÂ´Ê´´Ôì
+        // 5. æ–°è¯åˆ›é€ 
         // ============================================================
         int createRate = (curEmo.type == EMO_EXCITE) ? hp.CREATE_CHAR_RATE_EXCITE : hp.CREATE_CHAR_RATE_NORMAL;
         if (rand() % createRate == 0) {
@@ -4191,10 +4319,24 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
                 candAll.emplace_back(newId, sc);
             }
         }
-        logger.logDebug("ĞÂ´Ê´´ÔìÍê³É");
-
+        logger.logDebug("æ–°è¯åˆ›é€ å®Œæˆ");
+		
+		// åœ¨ candAll æ„å»ºå®Œæˆåï¼Œæ’åºä¹‹å‰
+		if (userModel.hasData()) {
+		    vector<int> candidateTokens;
+		    for (auto& p : candAll) candidateTokens.push_back(p.first);
+		    auto userScores = userModel.simulateCandidates(candidateTokens, ctx);
+		    unordered_map<int, float> userMap;
+		    for (auto& us : userScores) userMap[us.first] = us.second;
+		    for (auto& p : candAll) {
+		        auto it = userMap.find(p.first);
+		        if (it != userMap.end()) {
+		            p.second += (int)(it->second * 60);  // æƒé‡ 60 åˆ†ï¼Œå¯è°ƒ
+		        }
+		    }
+		}
         // ============================================================
-        // 6. ÅÅĞò + ¸ÅÂÊÑ¡Ôñ
+        // 6. æ’åº + æ¦‚ç‡é€‰æ‹©
         // ============================================================
         std::sort(candAll.begin(), candAll.end(),
             [](const std::pair<int,int>& a, const std::pair<int,int>& b) { return a.second > b.second; });
@@ -4208,10 +4350,10 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
             prob.emplace_back(p.first, w);
             total += w;
         }
-        logger.logDebug("¸ÅÂÊ¼ÆËãÍê³É, total=" + to_string(total) + ", prob.size=" + to_string(prob.size()));
+        logger.logDebug("æ¦‚ç‡è®¡ç®—å®Œæˆ, total=" + to_string(total) + ", prob.size=" + to_string(prob.size()));
         
         if (total <= 0) {
-            logger.logDebug("total<=0 ÍË³ö");
+            logger.logDebug("total<=0 é€€å‡º");
             break;
         }
         
@@ -4220,15 +4362,15 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
             sum += p.second;
             if (sum > r) { sel = p.first; break; }
         }
-        logger.logDebug("Ñ¡ÔñÍê³É, sel=" + to_string(sel));
+        logger.logDebug("é€‰æ‹©å®Œæˆ, sel=" + to_string(sel));
         
         if (sel == -1) {
-            logger.logDebug("sel==-1 ÍË³ö");
+            logger.logDebug("sel==-1 é€€å‡º");
             break;
         }
 
         // ============================================================
-        // 7. Ô¤²âÎó²î¼ÆËãÓë´«²¥
+        // 7. é¢„æµ‹è¯¯å·®è®¡ç®—ä¸ä¼ æ’­
         // ============================================================
         float probSelected = 0.0f;
         for (auto& p : prob) {
@@ -4254,13 +4396,13 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
         }
 
         if (!ctx.empty()) {
-            logger.logDebug("µ÷ÓÃ propagateTokenError, sel=" + to_string(sel) + ", surprise=" + to_string(surprise));
+            logger.logDebug("è°ƒç”¨ propagateTokenError, sel=" + to_string(sel) + ", surprise=" + to_string(surprise));
             propagateTokenError(sel, surprise, ctx, token);
-            logger.logDebug("propagateTokenError Íê³É");
+            logger.logDebug("propagateTokenError å®Œæˆ");
         }
 
         // ============================================================
-        // 8. ¼ÇÂ¼±ß + TDÑ§Ï°
+        // 8. è®°å½•è¾¹ + TDå­¦ä¹ 
         // ============================================================
         std::vector<DynamicEdge*> involvedEdges;
         if (!ctx.empty()) {
@@ -4275,21 +4417,21 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
 
         int flu = calcFluency(ctx, token);
         stepFluency.push_back(flu);
-		// ========== ĞÂÔö£º¼ÇÂ¼¼¤»î±ß ==========
-        // ========== ¼ÇÂ¼¼¤»î±ß£¨°²È«°æ£© ==========
+		// ========== æ–°å¢ï¼šè®°å½•æ¿€æ´»è¾¹ ==========
+        // ========== è®°å½•æ¿€æ´»è¾¹ï¼ˆå®‰å…¨ç‰ˆï¼‰ ==========
 		if (!ctx.empty()) {
 		    int lastTid = ctx.back();
 		    Neuron* prevNeu = findNeuronByToken(lastTid);
 		    if (prevNeu) {
 		        int neuronId = prevNeu->neuronId;
 		        
-		        // ¼ÇÂ¼´Ó lastTid µ½ sel µÄ±ß
+		        // è®°å½•ä» lastTid åˆ° sel çš„è¾¹
 		        DynamicEdge* edge = prevNeu->findOutput(sel);
 		        if (edge) {
-		            recordActivatedEdge(neuronId, sel);  // ¡û ´æ (Éñ¾­ÔªID, Ä¿±êtoken)
+		            recordActivatedEdge(neuronId, sel);  // â† å­˜ (ç¥ç»å…ƒID, ç›®æ ‡token)
 		        }
 		        
-		        // ¼ÇÂ¼ËùÓĞÓĞÒâÒåµÄ±ß
+		        // è®°å½•æ‰€æœ‰æœ‰æ„ä¹‰çš„è¾¹
 		        for (auto& e : prevNeu->outputs) {
 		            if (e.weight > 2) {
 		                recordActivatedEdge(neuronId, e.target);
@@ -4299,17 +4441,17 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
 		}
 		recordActivatedToken(sel);
         // ============================================================
-        // 9. ¸üĞÂÉÏÏÂÎÄºÍ¼ÇÒä
+        // 9. æ›´æ–°ä¸Šä¸‹æ–‡å’Œè®°å¿†
         // ============================================================
         ctx.push_back(sel);
         addToShortMemory(sel);
         activateAmygdala(sel);
-        logger.logDebug("ÉÏÏÂÎÄ¸üĞÂÍê³É, ctx.size=" + to_string(ctx.size()));
+        logger.logDebug("ä¸Šä¸‹æ–‡æ›´æ–°å®Œæˆ, ctx.size=" + to_string(ctx.size()));
         
         {
             lock_guard<recursive_mutex> lock(tokenMtx);
-            if (sel >= 0 && sel < (int)token.vocabList.size() && token.vocabList[sel] == "¡£") {
-                logger.logDebug("Óöµ½¾äºÅ£¬½áÊøÉú³É");
+            if (sel >= 0 && sel < (int)token.vocabList.size() && token.vocabList[sel] == "ã€‚") {
+                logger.logDebug("é‡åˆ°å¥å·ï¼Œç»“æŸç”Ÿæˆ");
                 break;
             }
         }
@@ -4329,40 +4471,40 @@ vector<int> BrainCortex::singleGenerate(vector<int> ctx, TextTokenizer& token) {
         }
 
         // ============================================================
-        // 10. ¶¨ÆÚÕûºÏÈ«¾ÖÔ¤²âÎó²î
+        // 10. å®šæœŸæ•´åˆå…¨å±€é¢„æµ‹è¯¯å·®
         // ============================================================
         if (step > 0 && step % 10 == 0) {
-            logger.logDebug("µ÷ÓÃ integrateGlobalPredictionError");
+            logger.logDebug("è°ƒç”¨ integrateGlobalPredictionError");
             integrateGlobalPredictionError();
-            logger.logDebug("integrateGlobalPredictionError Íê³É");
+            logger.logDebug("integrateGlobalPredictionError å®Œæˆ");
         }
         
-        logger.logDebug("Ö÷Ñ­»·µÚ " + to_string(step) + " ²½Íê³É");
+        logger.logDebug("ä¸»å¾ªç¯ç¬¬ " + to_string(step) + " æ­¥å®Œæˆ");
     }
 
-    logger.logDebug("Ö÷Ñ­»·½áÊø£¬¹² " + to_string(step) + " ²½");
+    logger.logDebug("ä¸»å¾ªç¯ç»“æŸï¼Œå…± " + to_string(step) + " æ­¥");
 
     applyTDUpdates();
-    logger.logDebug("applyTDUpdates Íê³É");
+    logger.logDebug("applyTDUpdates å®Œæˆ");
     
     curSubgraph.clear();
-    logger.logDebug("curSubgraph.clear Íê³É");
+    logger.logDebug("curSubgraph.clear å®Œæˆ");
     
-    logger.logDebug("singleGenerate ½áÊø£¬·µ»Ø ctx.size=" + to_string(ctx.size()));
+    logger.logDebug("singleGenerate ç»“æŸï¼Œè¿”å› ctx.size=" + to_string(ctx.size()));
     
     return ctx;
 }
 void BrainCortex::updateGains(const std::vector<int>& ctx, TextTokenizer& token) {
-    logger.logDebug("updateGains ½øÈë");
+    logger.logDebug("updateGains è¿›å…¥");
     
     float base = 1.0f;
-    logger.logDebug("updateGains ¼ÆËã base");
+    logger.logDebug("updateGains è®¡ç®— base");
     
     float err = getSelfValue("PredictionErrorGlobal") / 50.0f;
-    logger.logDebug("updateGains ¼ÆËã err=" + to_string(err));
+    logger.logDebug("updateGains è®¡ç®— err=" + to_string(err));
     
     err = std::max(0.0f, std::min(1.0f, err));
-    logger.logDebug("updateGains err ²Ã¼ôºó=" + to_string(err));
+    logger.logDebug("updateGains err è£å‰ªå=" + to_string(err));
 
     alpha_L = base + err * 0.6f;
     logger.logDebug("updateGains alpha_L=" + to_string(alpha_L));
@@ -4378,7 +4520,7 @@ void BrainCortex::updateGains(const std::vector<int>& ctx, TextTokenizer& token)
     alpha_A = std::max(0.4f, std::min(1.6f, alpha_A));
     alpha_R = std::max(0.4f, std::min(1.6f, alpha_R));
     
-    logger.logDebug("updateGains Íê³É");
+    logger.logDebug("updateGains å®Œæˆ");
 }
 
 // ===================== GrowingAGI =====================
@@ -4400,20 +4542,20 @@ public:
     float stringSimilarity(const string& a, const string& b);
     vector<int> getKnowledgeAnswer(const string& input);
     
-    // ========== ĞÂÔö£ºÍâ²¿¿ØÖÆ½Ó¿Ú ==========
+    // ========== æ–°å¢ï¼šå¤–éƒ¨æ§åˆ¶æ¥å£ ==========
     void setGoal(int goalToken) {
         cortex.setGoal(goalToken);
         if (goalToken >= 0 && goalToken < (int)token.vocabList.size()) {
-            cout << "[ÏµÍ³] ÉèÖÃÄ¿±êÎª: " << token.vocabList[goalToken] << endl;
+            cout << "[ç³»ç»Ÿ] è®¾ç½®ç›®æ ‡ä¸º: " << token.vocabList[goalToken] << endl;
         } else {
-            cout << "[ÏµÍ³] ÉèÖÃÄ¿±ê token: " << goalToken << endl;
+            cout << "[ç³»ç»Ÿ] è®¾ç½®ç›®æ ‡ token: " << goalToken << endl;
         }
     }
     
     void setStyle(StyleIntent style) {
         cortex.setStyle(style);
         const char* styleName[] = {"STORY", "EMOTION", "SIMPLE"};
-        cout << "[ÏµÍ³] ÉèÖÃ·ç¸ñÎª: " << styleName[style] << endl;
+        cout << "[ç³»ç»Ÿ] è®¾ç½®é£æ ¼ä¸º: " << styleName[style] << endl;
     }
     
     string getConsciousReport() {
@@ -4426,35 +4568,35 @@ public:
     
     void onlineLearn(const string& text) {
         if (!text.empty()) {
-            cout << "[ÏµÍ³] ¿ªÊ¼ÔÚÏßÑ§Ï°..." << endl;
+            cout << "[ç³»ç»Ÿ] å¼€å§‹åœ¨çº¿å­¦ä¹ ..." << endl;
             auto seq = token.encode(text);
             cortex.onlineLearn(text, token);
-            cout << "[ÏµÍ³] ÔÚÏßÑ§Ï°Íê³É£¡" << endl;
+            cout << "[ç³»ç»Ÿ] åœ¨çº¿å­¦ä¹ å®Œæˆï¼" << endl;
         }
     }
     
-    // ========== ĞÂÔö£º×´Ì¬²éÑ¯ ==========
+    // ========== æ–°å¢ï¼šçŠ¶æ€æŸ¥è¯¢ ==========
     void printStatus() {
-        cout << "\n=== ÏµÍ³×´Ì¬ ===" << endl;
-        cout << "Éñ¾­Ôª×ÜÊı: " << cortex.getTotalNeurons() << endl;
-        cout << "¶ÌÊ±¼ÇÒä´óĞ¡: " << cortex.shortMemory.size() << endl;
-        cout << "ÇéĞ÷×´Ì¬: " << cortex.getEmotionStatus() << endl;
-        cout << "µ±Ç°·ç¸ñ: " << cortex.getStyleName() << endl;
-        cout << "µ±Ç°Ä¿±ê: ";
+        cout << "\n=== ç³»ç»ŸçŠ¶æ€ ===" << endl;
+        cout << "ç¥ç»å…ƒæ€»æ•°: " << cortex.getTotalNeurons() << endl;
+        cout << "çŸ­æ—¶è®°å¿†å¤§å°: " << cortex.shortMemory.size() << endl;
+        cout << "æƒ…ç»ªçŠ¶æ€: " << cortex.getEmotionStatus() << endl;
+        cout << "å½“å‰é£æ ¼: " << cortex.getStyleName() << endl;
+        cout << "å½“å‰ç›®æ ‡: ";
         if (cortex.getGoalIntent() >= 0 && cortex.getGoalIntent() < (int)token.vocabList.size()) {
             cout << token.vocabList[cortex.getGoalIntent()];
         } else {
-            cout << "Î´ÉèÖÃ";
+            cout << "æœªè®¾ç½®";
         }
         cout << endl;
-        cout << "¼¤»îË®Æ½: " << cortex.getSelfValue("AvgActivation") << endl;
-        cout << "ÖÊÁ¿ÆÀ·Ö: " << cortex.getSelfValue("QualitySliding") << endl;
+        cout << "æ¿€æ´»æ°´å¹³: " << cortex.getSelfValue("AvgActivation") << endl;
+        cout << "è´¨é‡è¯„åˆ†: " << cortex.getSelfValue("QualitySliding") << endl;
         cout << "\n" << getConsciousReport() << endl;
         cout << "================" << endl;
     }
 };
 
-// ===================== GrowingAGI ÊµÏÖ =====================
+// ===================== GrowingAGI å®ç° =====================
 void GrowingAGI::initKnowledge(){
     token.loadKnowledge();
     for(auto& kv:token.knowledgeVec){
@@ -4464,66 +4606,66 @@ void GrowingAGI::initKnowledge(){
     }
 }/*
 void GrowingAGI::initKnowledge(){
-    // ========== Ó²±àÂëÖªÊ¶¿â£¨ÈÆ¹ıÎÄ¼ş£© ==========
+    // ========== ç¡¬ç¼–ç çŸ¥è¯†åº“ï¼ˆç»•è¿‡æ–‡ä»¶ï¼‰ ==========
     vector<pair<string, string>> hardcodedKnowledge = {
-        {"ÄãºÃ", "ÄãºÃ£¬ºÜ¸ßĞËÈÏÊ¶Äã£¡"},
-        {"ÌìÆø", "½ñÌìÌìÆø²»´í£¬ÊÊºÏ³öÃÅÉ¢²½¡£"},
-        {"ÔÙ¼û", "ÔÙ¼û£¬»¶Ó­ÏÂ´ÎÔÙÀ´£¡"},
-        // ... ÄãÏë¼ÓÊ²Ã´¾Í¼ÓÊ²Ã´
+        {"ä½ å¥½", "ä½ å¥½ï¼Œå¾ˆé«˜å…´è®¤è¯†ä½ ï¼"},
+        {"å¤©æ°”", "ä»Šå¤©å¤©æ°”ä¸é”™ï¼Œé€‚åˆå‡ºé—¨æ•£æ­¥ã€‚"},
+        {"å†è§", "å†è§ï¼Œæ¬¢è¿ä¸‹æ¬¡å†æ¥ï¼"},
+        // ... ä½ æƒ³åŠ ä»€ä¹ˆå°±åŠ ä»€ä¹ˆ
     };
     
-    // Ö±½Ó×¢Èëµ½ token.knowledgeVec
+    // ç›´æ¥æ³¨å…¥åˆ° token.knowledgeVec
     for (auto& entry : hardcodedKnowledge) {
-        // ÏÈÈ·±£´Ê±íÀïÓĞÕâĞ©×Ö
+        // å…ˆç¡®ä¿è¯è¡¨é‡Œæœ‰è¿™äº›å­—
         token.buildVocab(entry.first);
         token.buildVocab(entry.second);
         
-        // ±àÂë
+        // ç¼–ç 
         vector<int> ktok = token.encode(entry.first);
         vector<int> vtok = token.encode(entry.second);
         
-        // ´æµ½ knowledgeVec
+        // å­˜åˆ° knowledgeVec
         token.knowledgeVec.emplace_back(entry.first, vtok);
         
-        // ´´½¨¸ÅÄî
+        // åˆ›å»ºæ¦‚å¿µ
         int cid = token.createConcept(ktok, "knowledge");
         cortex.injectKnowledge(cid, vtok, token);
     }
 }*/
 void GrowingAGI::train(const string& corpus){
-    cout<<"[1] ¹¹½¨´Ê±í...\n"; token.buildVocab(corpus);
-    cout<<"[2] ±àÂë...\n"; auto seq=token.encode(corpus);
-    cout<<"[3] ×ÔÑ§Ï°£¨selfGrowth£©...\n";
+    cout<<"[1] æ„å»ºè¯è¡¨...\n"; token.buildVocab(corpus);
+    cout<<"[2] ç¼–ç ...\n"; auto seq=token.encode(corpus);
+    cout<<"[3] è‡ªå­¦ä¹ ï¼ˆselfGrowthï¼‰...\n";
     for(int i=0; i<epochs; i++){
-        cout << "  µÚ " << i+1 << " ÂÖÑ§Ï°..." << endl;
+        cout << "  ç¬¬ " << i+1 << " è½®å­¦ä¹ ..." << endl;
         cortex.selfGrowth(seq,token);
     }
-    cout<<"[4] ¼ÓÔØÖªÊ¶¿â...\n"; initKnowledge();
-    cout<<"[5] ÌáÈ¡¶ÌÓïºÍ´ÊĞÔÄ£°å...\n";
+    cout<<"[4] åŠ è½½çŸ¥è¯†åº“...\n"; initKnowledge();
+    cout<<"[5] æå–çŸ­è¯­å’Œè¯æ€§æ¨¡æ¿...\n";
     token.extractTemplatesFromCorpus(seq);
     token.extractTemplatesFromExcellentFile();
-    cout<<"Íê³É£¬Éñ¾­Ôª×ÜÊı£º"<<cortex.totalNeurons()<<endl;
+    cout<<"å®Œæˆï¼Œç¥ç»å…ƒæ€»æ•°ï¼š"<<cortex.totalNeurons()<<endl;
 }
 
 void GrowingAGI::appendExcellent(const string& text){
     if(text.empty() || (int)text.size()>200 || (int)text.size()<15) return;
-    // ¼ì²éÖØ¸´£¨¶ÁÈ¡ÎÄ¼şÊ±£¬ÎÄ¼şÄÚÈİÎª UTF-8£¬Ğè×ªÎª GBK ±È½Ï£©
+    // æ£€æŸ¥é‡å¤ï¼ˆè¯»å–æ–‡ä»¶æ—¶ï¼Œæ–‡ä»¶å†…å®¹ä¸º UTF-8ï¼Œéœ€è½¬ä¸º GBK æ¯”è¾ƒï¼‰
     ifstream check(DYNAMIC_TRAIN_FILE);
     bool exist=false;
     if(check.is_open()){
         string line;
         while(getline(check, line)){
-            string gbkLine = utf8ToGbk(line);  // ½« UTF-8 ĞĞ×ªÎª GBK ºóÔÙ±È½Ï
+            string gbkLine = utf8ToGbk(line);  // å°† UTF-8 è¡Œè½¬ä¸º GBK åå†æ¯”è¾ƒ
             if(gbkLine == text){ exist = true; break; }
         }
         check.close();
     }
     if(exist) return;
-    // Ğ´ÈëÇ°½« GBK ×ªÎª UTF-8
+    // å†™å…¥å‰å°† GBK è½¬ä¸º UTF-8
     string utf8Text = gbkToUtf8(text);
     ofstream f(DYNAMIC_TRAIN_FILE, ios::app);
     if(f){ f << utf8Text << "\n"; f.close(); }
-    // ÌáÈ¡Ä£°åÊ±Ê¹ÓÃÔ­Ê¼ GBK text£¨ÄÚ²¿´¦Àí£©
+    // æå–æ¨¡æ¿æ—¶ä½¿ç”¨åŸå§‹ GBK textï¼ˆå†…éƒ¨å¤„ç†ï¼‰
     vector<int> seq = token.encode(text);
     token.extractTemplatesFromCorpus(seq);
 }
@@ -4576,11 +4718,11 @@ vector<int> GrowingAGI::generate(const string& prompt, int mode) {
     dialogueCount++;
     cortex.stepCounter++;
     // ============================================================
-    // Step 0: ÖªÊ¶¿âÄ£ºıÆ¥Åä
+    // Step 0: çŸ¥è¯†åº“æ¨¡ç³ŠåŒ¹é…
     // ============================================================
     vector<int> knowledgeAnswer = getKnowledgeAnswer(prompt);
     if (!knowledgeAnswer.empty()) {
-        // ÃüÖĞÖªÊ¶¿â£¬Ö±½Ó·µ»Ø
+        // å‘½ä¸­çŸ¥è¯†åº“ï¼Œç›´æ¥è¿”å›
         for (int tid : knowledgeAnswer) {
             cortex.addToShortMemory(tid);
         }
@@ -4676,7 +4818,7 @@ vector<int> GrowingAGI::generate(const string& prompt, int mode) {
 
 void GrowingAGI::saveModel(const string& path){
     ofstream f(path,ios::binary); if(!f) return;
-    // ========== Ğ´Èë×ÜÉñ¾­ÔªÊı ==========
+    // ========== å†™å…¥æ€»ç¥ç»å…ƒæ•° ==========
     int totalNeuronCount = cortex.totalNeurons();
     f.write((char*)&totalNeuronCount, sizeof(totalNeuronCount));
     { lock_guard<recursive_mutex> lock(tokenMtx); int vs=token.vocabList.size(); f.write((char*)&vs,sizeof(vs)); for(auto& s:token.vocabList){ int l=s.size(); f.write((char*)&l,sizeof(l)); f.write(s.data(),l); }
@@ -4738,19 +4880,19 @@ void GrowingAGI::saveModel(const string& path){
     }
     f.close();
 }
-// ========== ÔÚ GrowingAGI ÀàÀïÌí¼Ó ==========
+// ========== åœ¨ GrowingAGI ç±»é‡Œæ·»åŠ  ==========
 
-// 1. ×Ö·û´®ÏàËÆ¶È¼ÆËã£¨Jaccard + ±à¼­¾àÀë»ìºÏ£©
+// 1. å­—ç¬¦ä¸²ç›¸ä¼¼åº¦è®¡ç®—ï¼ˆJaccard + ç¼–è¾‘è·ç¦»æ··åˆï¼‰
 float GrowingAGI::stringSimilarity(const string& a, const string& b) {
     if (a.empty() || b.empty()) return 0.0f;
     if (a == b) return 1.0f;
     
-    // Èç¹ûÒ»·½ÍêÈ«°üº¬ÁíÒ»·½£¬¸øÓè¸ß·Ö
+    // å¦‚æœä¸€æ–¹å®Œå…¨åŒ…å«å¦ä¸€æ–¹ï¼Œç»™äºˆé«˜åˆ†
     if (a.find(b) != string::npos || b.find(a) != string::npos) {
         return 0.85f;
     }
     
-    // Jaccard ÏàËÆ¶È£¨×Ö·û¼¶±ğ£©
+    // Jaccard ç›¸ä¼¼åº¦ï¼ˆå­—ç¬¦çº§åˆ«ï¼‰
     unordered_set<char> setA(a.begin(), a.end());
     unordered_set<char> setB(b.begin(), b.end());
     
@@ -4761,10 +4903,10 @@ float GrowingAGI::stringSimilarity(const string& a, const string& b) {
     int unionSize = setA.size() + setB.size() - intersection;
     float jaccard = unionSize == 0 ? 0.0f : (float)intersection / unionSize;
     
-    // Èç¹û Jaccard Ì«µÍ£¬Ö±½Ó·µ»Ø
+    // å¦‚æœ Jaccard å¤ªä½ï¼Œç›´æ¥è¿”å›
     if (jaccard < 0.2f) return jaccard;
     
-    // ±à¼­¾àÀë£¨Levenshtein£©
+    // ç¼–è¾‘è·ç¦»ï¼ˆLevenshteinï¼‰
     int m = a.size(), n = b.size();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1));
     for (int i = 0; i <= m; i++) dp[i][0] = i;
@@ -4783,22 +4925,22 @@ float GrowingAGI::stringSimilarity(const string& a, const string& b) {
     float normalizedDist = dist / maxLen;
     float levenshteinSim = 1.0f - normalizedDist;
     
-    // »ìºÏµÃ·Ö£ºJaccard È¨ÖØ 0.4£¬±à¼­¾àÀëÈ¨ÖØ 0.6
+    // æ··åˆå¾—åˆ†ï¼šJaccard æƒé‡ 0.4ï¼Œç¼–è¾‘è·ç¦»æƒé‡ 0.6
     return jaccard * 0.4f + levenshteinSim * 0.6f;
 }
 
 vector<int> GrowingAGI::getKnowledgeAnswer(const string& input) {
-    const float MATCH_THRESHOLD = 0.35f;  // Æ¥ÅäãĞÖµ
+    const float MATCH_THRESHOLD = 0.35f;  // åŒ¹é…é˜ˆå€¼
     
-    // ÏÈ³¢ÊÔ¾«È·Æ¥Åä£¨¿ìËÙÂ·¾¶£©
+    // å…ˆå°è¯•ç²¾ç¡®åŒ¹é…ï¼ˆå¿«é€Ÿè·¯å¾„ï¼‰
     for (auto& kv : token.knowledgeVec) {
         if (input == kv.first) {
-            cout << "[ÖªÊ¶¿â] ¾«È·ÃüÖĞ: " << kv.first << endl;
+            cout << "[çŸ¥è¯†åº“] ç²¾ç¡®å‘½ä¸­: " << kv.first << endl;
             return kv.second;
         }
     }
     
-    // Ä£ºıÆ¥Åä£º±éÀúËùÓĞÖªÊ¶ÌõÄ¿
+    // æ¨¡ç³ŠåŒ¹é…ï¼šéå†æ‰€æœ‰çŸ¥è¯†æ¡ç›®
     string bestKey;
     vector<int> bestValue;
     float bestScore = 0.0f;
@@ -4806,10 +4948,10 @@ vector<int> GrowingAGI::getKnowledgeAnswer(const string& input) {
     for (auto& kv : token.knowledgeVec) {
         const string& key = kv.first;
         
-        // ¼ÆËãÏàËÆ¶È
+        // è®¡ç®—ç›¸ä¼¼åº¦
         float sim = stringSimilarity(input, key);
         
-        // Èç¹ûÏàËÆ¶È³¬¹ıãĞÖµ£¬¼ÇÂ¼×î¼ÑÆ¥Åä
+        // å¦‚æœç›¸ä¼¼åº¦è¶…è¿‡é˜ˆå€¼ï¼Œè®°å½•æœ€ä½³åŒ¹é…
         if (sim >= MATCH_THRESHOLD && sim > bestScore) {
             bestScore = sim;
             bestKey = key;
@@ -4818,52 +4960,52 @@ vector<int> GrowingAGI::getKnowledgeAnswer(const string& input) {
     }
     
     if (bestScore >= MATCH_THRESHOLD) {
-        cout << "[ÖªÊ¶¿â] Ä£ºıÃüÖĞ: '" << input << "' ¡ú '" << bestKey 
-             << "' (ÏàËÆ¶È: " << (int)(bestScore * 100) << "%)" << endl;
+        cout << "[çŸ¥è¯†åº“] æ¨¡ç³Šå‘½ä¸­: '" << input << "' â†’ '" << bestKey 
+             << "' (ç›¸ä¼¼åº¦: " << (int)(bestScore * 100) << "%)" << endl;
         return bestValue;
     }
     
-    return {};  // Ã»ÕÒµ½
+    return {};  // æ²¡æ‰¾åˆ°
 }
 bool GrowingAGI::loadModel(const string& path) {
-    logger.logImportant("========== ¿ªÊ¼¼ÓÔØÄ£ĞÍ ==========");
-    logger.logDebug("Ä£ĞÍÂ·¾¶: " + path);
+    logger.logImportant("========== å¼€å§‹åŠ è½½æ¨¡å‹ ==========");
+    logger.logDebug("æ¨¡å‹è·¯å¾„: " + path);
     
     ifstream f(path, ios::binary);
     if (!f.is_open()) {
-        logger.logError("ÎŞ·¨´ò¿ªÄ£ĞÍÎÄ¼ş: " + path);
+        logger.logError("æ— æ³•æ‰“å¼€æ¨¡å‹æ–‡ä»¶: " + path);
         return false;
     }
-    logger.logDebug("ÎÄ¼şÒÑ´ò¿ª");
+    logger.logDebug("æ–‡ä»¶å·²æ‰“å¼€");
 
-    // 1. ¼ì²éÎÄ¼ş´óĞ¡
+    // 1. æ£€æŸ¥æ–‡ä»¶å¤§å°
     f.seekg(0, ios::end);
     size_t fileSize = f.tellg();
     f.seekg(0, ios::beg);
-    logger.logDebug("ÎÄ¼ş´óĞ¡: " + to_string(fileSize) + " ×Ö½Ú (" + to_string(fileSize / 1024.0) + " KB)");
+    logger.logDebug("æ–‡ä»¶å¤§å°: " + to_string(fileSize) + " å­—èŠ‚ (" + to_string(fileSize / 1024.0) + " KB)");
 
     if (fileSize < 1024) {
-        logger.logError("ÎÄ¼şÌ«Ğ¡ (" + to_string(fileSize) + " ×Ö½Ú)£¬·ÅÆú¼ÓÔØ");
+        logger.logError("æ–‡ä»¶å¤ªå° (" + to_string(fileSize) + " å­—èŠ‚)ï¼Œæ”¾å¼ƒåŠ è½½");
         f.close();
         return false;
     }
 
-    // 2. ¶ÁÈ¡×ÜÉñ¾­ÔªÊıÁ¿£¨µÚÒ»¸ö int£©
+    // 2. è¯»å–æ€»ç¥ç»å…ƒæ•°é‡ï¼ˆç¬¬ä¸€ä¸ª intï¼‰
     int totalNeuronCount;
     f.read((char*)&totalNeuronCount, sizeof(totalNeuronCount));
-    logger.logImportant("×ÜÉñ¾­ÔªÊı: " + to_string(totalNeuronCount));
+    logger.logImportant("æ€»ç¥ç»å…ƒæ•°: " + to_string(totalNeuronCount));
 
     if (totalNeuronCount < 0 || totalNeuronCount > 10000000) {
-        logger.logError("Éñ¾­ÔªÊıÁ¿Òì³£: " + to_string(totalNeuronCount) + "£¬ÎÄ¼şËğ»µ");
+        logger.logError("ç¥ç»å…ƒæ•°é‡å¼‚å¸¸: " + to_string(totalNeuronCount) + "ï¼Œæ–‡ä»¶æŸå");
         f.close();
         return false;
     }
-    logger.logDebug("Éñ¾­ÔªÊıÁ¿¼ì²éÍ¨¹ı ?");
+    logger.logDebug("ç¥ç»å…ƒæ•°é‡æ£€æŸ¥é€šè¿‡ ?");
 
     // ========================================================================
-    // 3. ¶ÁÈ¡ TextTokenizer Êı¾İ
+    // 3. è¯»å– TextTokenizer æ•°æ®
     // ========================================================================
-    logger.logDebug("¿ªÊ¼¶ÁÈ¡ TextTokenizer Êı¾İ...");
+    logger.logDebug("å¼€å§‹è¯»å– TextTokenizer æ•°æ®...");
     {
         lock_guard<recursive_mutex> lock(tokenMtx);
         token.vocabList.clear();
@@ -4876,7 +5018,7 @@ bool GrowingAGI::loadModel(const string& path) {
         f.read((char*)&vs, sizeof(vs));
         logger.logDebug("vocabList.size = " + to_string(vs));
         if (vs < 0 || vs > 200000) {
-            logger.logError("vocabList ´óĞ¡Òì³£: " + to_string(vs));
+            logger.logError("vocabList å¤§å°å¼‚å¸¸: " + to_string(vs));
             f.close();
             return false;
         }
@@ -4885,7 +5027,7 @@ bool GrowingAGI::loadModel(const string& path) {
             int l;
             f.read((char*)&l, sizeof(l));
             if (l < 0 || l > 100) {
-                logger.logError("vocabList[" + to_string(i) + "] ×Ö·û´®³¤¶ÈÒì³£: " + to_string(l));
+                logger.logError("vocabList[" + to_string(i) + "] å­—ç¬¦ä¸²é•¿åº¦å¼‚å¸¸: " + to_string(l));
                 f.close();
                 return false;
             }
@@ -4893,14 +5035,14 @@ bool GrowingAGI::loadModel(const string& path) {
             f.read(&s[0], l);
             token.vocabList.push_back(s);
         }
-        logger.logDebug("vocabList ¶ÁÈ¡Íê³É ? (" + to_string(vs) + " Ìõ)");
+        logger.logDebug("vocabList è¯»å–å®Œæˆ ? (" + to_string(vs) + " æ¡)");
 
         // 3.2 radicalPool
         int rs;
         f.read((char*)&rs, sizeof(rs));
         logger.logDebug("radicalPool.size = " + to_string(rs));
         if (rs < 0 || rs > 100000) {
-            logger.logError("radicalPool ´óĞ¡Òì³£: " + to_string(rs));
+            logger.logError("radicalPool å¤§å°å¼‚å¸¸: " + to_string(rs));
             f.close();
             return false;
         }
@@ -4908,7 +5050,7 @@ bool GrowingAGI::loadModel(const string& path) {
             int l;
             f.read((char*)&l, sizeof(l));
             if (l < 0 || l > 100) {
-                logger.logError("radicalPool[" + to_string(i) + "] ×Ö·û´®³¤¶ÈÒì³£: " + to_string(l));
+                logger.logError("radicalPool[" + to_string(i) + "] å­—ç¬¦ä¸²é•¿åº¦å¼‚å¸¸: " + to_string(l));
                 f.close();
                 return false;
             }
@@ -4916,14 +5058,14 @@ bool GrowingAGI::loadModel(const string& path) {
             f.read(&s[0], l);
             token.radicalPool.insert(s);
         }
-        logger.logDebug("radicalPool ¶ÁÈ¡Íê³É ? (" + to_string(rs) + " Ìõ)");
+        logger.logDebug("radicalPool è¯»å–å®Œæˆ ? (" + to_string(rs) + " æ¡)");
 
         // 3.3 conceptSeq
         int cs;
         f.read((char*)&cs, sizeof(cs));
         logger.logDebug("conceptSeq.size = " + to_string(cs));
         if (cs < 0 || cs > 100000) {
-            logger.logError("conceptSeq ´óĞ¡Òì³£: " + to_string(cs));
+            logger.logError("conceptSeq å¤§å°å¼‚å¸¸: " + to_string(cs));
             f.close();
             return false;
         }
@@ -4933,7 +5075,7 @@ bool GrowingAGI::loadModel(const string& path) {
             int t;
             f.read((char*)&t, sizeof(t));
             if (t < 0 || t > 1000000) {
-                logger.logError("conceptSeq[" + to_string(i) + "] ³¤¶ÈÒì³£: " + to_string(t));
+                logger.logError("conceptSeq[" + to_string(i) + "] é•¿åº¦å¼‚å¸¸: " + to_string(t));
                 f.close();
                 return false;
             }
@@ -4944,7 +5086,7 @@ bool GrowingAGI::loadModel(const string& path) {
             token.conceptSeq.push_back(v);
             token.conceptContent.emplace_back();
         }
-        logger.logDebug("conceptSeq ¶ÁÈ¡Íê³É ? (" + to_string(cs) + " Ìõ)");
+        logger.logDebug("conceptSeq è¯»å–å®Œæˆ ? (" + to_string(cs) + " æ¡)");
 
         // 3.4 nextConceptId
         f.read((char*)&token.nextConceptId, sizeof(token.nextConceptId));
@@ -4955,7 +5097,7 @@ bool GrowingAGI::loadModel(const string& path) {
         f.read((char*)&ptSize, sizeof(ptSize));
         logger.logDebug("phraseTemplates.size = " + to_string(ptSize));
         if (ptSize < 0 || ptSize > 100000) {
-            logger.logError("phraseTemplates ´óĞ¡Òì³£: " + to_string(ptSize));
+            logger.logError("phraseTemplates å¤§å°å¼‚å¸¸: " + to_string(ptSize));
             f.close();
             return false;
         }
@@ -4966,7 +5108,7 @@ bool GrowingAGI::loadModel(const string& path) {
             int len;
             f.read((char*)&len, sizeof(len));
             if (len < 0 || len > 10) {
-                logger.logError("phraseTemplates[" + to_string(i) + "] ³¤¶ÈÒì³£: " + to_string(len));
+                logger.logError("phraseTemplates[" + to_string(i) + "] é•¿åº¦å¼‚å¸¸: " + to_string(len));
                 f.close();
                 return false;
             }
@@ -4977,7 +5119,7 @@ bool GrowingAGI::loadModel(const string& path) {
             int cnt;
             f.read((char*)&cnt, sizeof(cnt));
             if (cnt < 0 || cnt > 10000) {
-                logger.logError("phraseTemplates[" + to_string(i) + "] ¼ÆÊıÒì³£: " + to_string(cnt));
+                logger.logError("phraseTemplates[" + to_string(i) + "] è®¡æ•°å¼‚å¸¸: " + to_string(cnt));
                 f.close();
                 return false;
             }
@@ -4989,14 +5131,14 @@ bool GrowingAGI::loadModel(const string& path) {
                 }
             }
         }
-        logger.logDebug("phraseTemplates ¶ÁÈ¡Íê³É ? (" + to_string(ptSize) + " Ìõ)");
+        logger.logDebug("phraseTemplates è¯»å–å®Œæˆ ? (" + to_string(ptSize) + " æ¡)");
 
         // 3.6 posSkeletonTemplates
         int skSize;
         f.read((char*)&skSize, sizeof(skSize));
         logger.logDebug("posSkeletonTemplates.size = " + to_string(skSize));
         if (skSize < 0 || skSize > 100000) {
-            logger.logError("posSkeletonTemplates ´óĞ¡Òì³£: " + to_string(skSize));
+            logger.logError("posSkeletonTemplates å¤§å°å¼‚å¸¸: " + to_string(skSize));
             f.close();
             return false;
         }
@@ -5007,22 +5149,22 @@ bool GrowingAGI::loadModel(const string& path) {
             f.read((char*)&code, sizeof(code));
             f.read((char*)&cnt, sizeof(cnt));
             if (cnt < 0 || cnt > 1000000) {
-                logger.logError("posSkeletonTemplates[" + to_string(i) + "] ¼ÆÊıÒì³£: " + to_string(cnt));
+                logger.logError("posSkeletonTemplates[" + to_string(i) + "] è®¡æ•°å¼‚å¸¸: " + to_string(cnt));
                 f.close();
                 return false;
             }
             token.posSkeletonTemplates.emplace_back(code, cnt);
         }
-        logger.logDebug("posSkeletonTemplates ¶ÁÈ¡Íê³É ? (" + to_string(skSize) + " Ìõ)");
+        logger.logDebug("posSkeletonTemplates è¯»å–å®Œæˆ ? (" + to_string(skSize) + " æ¡)");
 
         token.updateTokenCache();
-        logger.logDebug("TextTokenizer Êı¾İ¶ÁÈ¡Íê³É ?");
+        logger.logDebug("TextTokenizer æ•°æ®è¯»å–å®Œæˆ ?");
     }
 
     // ========================================================================
-    // 4. ¶ÁÈ¡ BrainCortex Êı¾İ
+    // 4. è¯»å– BrainCortex æ•°æ®
     // ========================================================================
-    logger.logDebug("¿ªÊ¼¶ÁÈ¡ BrainCortex Êı¾İ...");
+    logger.logDebug("å¼€å§‹è¯»å– BrainCortex æ•°æ®...");
     {
         lock_guard<recursive_mutex> lock(cortexMtx);
         for (auto& l : cortex.layers) l.clear();
@@ -5031,14 +5173,14 @@ bool GrowingAGI::loadModel(const string& path) {
         f.read((char*)&cortex.nextNeuronId, sizeof(cortex.nextNeuronId));
         logger.logDebug("nextNeuronId = " + to_string(cortex.nextNeuronId));
 
-        // 4.2 ¶ÁÈ¡Ã¿Ò»²ã
+        // 4.2 è¯»å–æ¯ä¸€å±‚
         for (int layerIdx = 0; layerIdx < (int)cortex.layers.size(); layerIdx++) {
             int sz;
             f.read((char*)&sz, sizeof(sz));
-            logger.logDebug("²ã " + to_string(layerIdx) + " Éñ¾­ÔªÊı = " + to_string(sz));
+            logger.logDebug("å±‚ " + to_string(layerIdx) + " ç¥ç»å…ƒæ•° = " + to_string(sz));
 
             if (sz < 0 || sz > 1000000) {
-                logger.logError("²ã " + to_string(layerIdx) + " ´óĞ¡Òì³£: " + to_string(sz));
+                logger.logError("å±‚ " + to_string(layerIdx) + " å¤§å°å¼‚å¸¸: " + to_string(sz));
                 f.close();
                 return false;
             }
@@ -5047,7 +5189,7 @@ bool GrowingAGI::loadModel(const string& path) {
             for (int i = 0; i < sz; i++) {
                 Neuron n;
 
-                // ¶ÁÈ¡»ù´¡×Ö¶Î
+                // è¯»å–åŸºç¡€å­—æ®µ
                 f.read((char*)&n.neuronId, sizeof(n.neuronId));
                 f.read((char*)&n.layer, sizeof(n.layer));
                 f.read((char*)&n.potential, sizeof(n.potential));
@@ -5061,7 +5203,7 @@ bool GrowingAGI::loadModel(const string& path) {
                 f.read((char*)&n.mode, sizeof(n.mode));
                 f.read((char*)&n.modeStrength, sizeof(n.modeStrength));
 
-                // ¶ÁÈ¡ boundTokens
+                // è¯»å– boundTokens
                 int bt;
                 f.read((char*)&bt, sizeof(bt));
                 for (int j = 0; j < bt; j++) {
@@ -5070,7 +5212,7 @@ bool GrowingAGI::loadModel(const string& path) {
                     n.boundTokens.insert(x);
                 }
 
-                // ¶ÁÈ¡ contextPositionPcts
+                // è¯»å– contextPositionPcts
                 int pctSize;
                 f.read((char*)&pctSize, sizeof(pctSize));
                 for (int j = 0; j < pctSize; j++) {
@@ -5085,7 +5227,7 @@ bool GrowingAGI::loadModel(const string& path) {
                     n.contextPositionPcts[contextID] = positions;
                 }
 
-                // ¶ÁÈ¡ tokenScoreVec
+                // è¯»å– tokenScoreVec
                 int ts;
                 f.read((char*)&ts, sizeof(ts));
                 for (int j = 0; j < ts; j++) {
@@ -5095,11 +5237,11 @@ bool GrowingAGI::loadModel(const string& path) {
                     n.tokenScoreVec.emplace_back(k, v);
                 }
 
-                // ¶ÁÈ¡ inputs
+                // è¯»å– inputs
                 int ins;
                 f.read((char*)&ins, sizeof(ins));
                 if (ins < 0 || ins > 100000) {
-                    logger.logError("Éñ¾­Ôª " + to_string(n.neuronId) + " inputs ÊıÁ¿Òì³£: " + to_string(ins));
+                    logger.logError("ç¥ç»å…ƒ " + to_string(n.neuronId) + " inputs æ•°é‡å¼‚å¸¸: " + to_string(ins));
                     f.close();
                     return false;
                 }
@@ -5115,11 +5257,11 @@ bool GrowingAGI::loadModel(const string& path) {
                     n.inputs.push_back(e);
                 }
 
-                // ¶ÁÈ¡ outputs
+                // è¯»å– outputs
                 int outs;
                 f.read((char*)&outs, sizeof(outs));
                 if (outs < 0 || outs > 100000) {
-                    logger.logError("Éñ¾­Ôª " + to_string(n.neuronId) + " outputs ÊıÁ¿Òì³£: " + to_string(outs));
+                    logger.logError("ç¥ç»å…ƒ " + to_string(n.neuronId) + " outputs æ•°é‡å¼‚å¸¸: " + to_string(outs));
                     f.close();
                     return false;
                 }
@@ -5137,7 +5279,7 @@ bool GrowingAGI::loadModel(const string& path) {
 
                 cortex.layers[layerIdx].push_back(n);
             }
-            logger.logDebug("²ã " + to_string(layerIdx) + " ¶ÁÈ¡Íê³É ? (" + to_string(sz) + " ¸öÉñ¾­Ôª)");
+            logger.logDebug("å±‚ " + to_string(layerIdx) + " è¯»å–å®Œæˆ ? (" + to_string(sz) + " ä¸ªç¥ç»å…ƒ)");
         }
 
         // 4.3 episodicMemory
@@ -5158,7 +5300,7 @@ bool GrowingAGI::loadModel(const string& path) {
             f.read((char*)&imp, sizeof(imp));
             cortex.episodicMemory.push_back({tokens, emb, chrono::system_clock::now(), imp});
         }
-        logger.logDebug("episodicMemory ¶ÁÈ¡Íê³É ? (" + to_string(em) + " Ìõ)");
+        logger.logDebug("episodicMemory è¯»å–å®Œæˆ ? (" + to_string(em) + " æ¡)");
 
         // 4.4 selfNeurons
         int sn;
@@ -5177,7 +5319,7 @@ bool GrowingAGI::loadModel(const string& path) {
             f.read((char*)&snn.error, sizeof(snn.error));
             cortex.selfNeurons.push_back(snn);
         }
-        logger.logDebug("selfNeurons ¶ÁÈ¡Íê³É ? (" + to_string(sn) + " Ìõ)");
+        logger.logDebug("selfNeurons è¯»å–å®Œæˆ ? (" + to_string(sn) + " æ¡)");
 
         // 4.5 qualityHistoryForSelf
         int qhSize;
@@ -5189,45 +5331,45 @@ bool GrowingAGI::loadModel(const string& path) {
             f.read((char*)&qv, sizeof(qv));
             cortex.qualityHistoryForSelf.push_back(qv);
         }
-        logger.logDebug("qualityHistoryForSelf ¶ÁÈ¡Íê³É ? (" + to_string(qhSize) + " Ìõ)");
+        logger.logDebug("qualityHistoryForSelf è¯»å–å®Œæˆ ? (" + to_string(qhSize) + " æ¡)");
 
-        // ²¹Æë selfNeurons
+        // è¡¥é½ selfNeurons
         while ((int)cortex.selfNeurons.size() < hp.SELF_NEURON_COUNT) {
             BrainCortex::SelfNeuron extra{"Extra", 0, 0, 0};
             cortex.selfNeurons.push_back(extra);
         }
 
         cortex.rebuildLayerIndex();
-        logger.logDebug("BrainCortex Êı¾İ¶ÁÈ¡Íê³É ?");
+        logger.logDebug("BrainCortex æ•°æ®è¯»å–å®Œæˆ ?");
     }
 
     f.close();
-    logger.logImportant("========== Ä£ĞÍ¼ÓÔØ³É¹¦£¡?? ==========");
+    logger.logImportant("========== æ¨¡å‹åŠ è½½æˆåŠŸï¼?? ==========");
     return true;
 }
 
 string readFile(const string& filePath){
     ifstream f(filePath, ios::binary);
-    if(!f){ cerr<<"´íÎó£ºÕÒ²»µ½ train.txt ÎÄ¼ş£¡"<<endl; return ""; }
+    if(!f){ cerr<<"é”™è¯¯ï¼šæ‰¾ä¸åˆ° train.txt æ–‡ä»¶ï¼"<<endl; return ""; }
     stringstream ss; ss<<f.rdbuf();
     string utf8Content = ss.str();
-    // UTF-8 -> GBK£¨ÄÚ²¿Ê¹ÓÃ£©
+    // UTF-8 -> GBKï¼ˆå†…éƒ¨ä½¿ç”¨ï¼‰
     string gbkContent = utf8ToGbk(utf8Content);
     return gbkContent;
 }
 
-// ===================== Ö÷º¯Êı =====================
+// ===================== ä¸»å‡½æ•° =====================
 void showHelp() {
-    cout << "\n=== ÃüÁîÁĞ±í ===" << endl;
-    cout << "exit/quit     - ÍË³ö³ÌĞò" << endl;
-    cout << "/goal         - ÉèÖÃÉú³ÉÄ¿±ê (ÀıÈç: /goal °®)" << endl;
-    cout << "/style        - ÉèÖÃÉú³É·ç¸ñ (0=STORY, 1=EMOTION, 2=SIMPLE)" << endl;
-    cout << "/status       - ÏÔÊ¾ÏµÍ³×´Ì¬" << endl;
-    cout << "/consolidate  - ÊÖ¶¯ÀëÏß¹®¹Ì (³ÖĞø2·ÖÖÓ)" << endl;
-    cout << "/train        - ÔÚÏßÑ§Ï°ĞÂÎÄ±¾" << endl;
-    cout << "/clear        - Çå¿Õ¶ÌÊ±¼ÇÒä" << endl;
-    cout << "/help         - ÏÔÊ¾´Ë°ïÖú" << endl;
-    cout << "Ö±½ÓÊäÈëÎÄ±¾  - Éú³É»Ø¸´" << endl;
+    cout << "\n=== å‘½ä»¤åˆ—è¡¨ ===" << endl;
+    cout << "exit/quit     - é€€å‡ºç¨‹åº" << endl;
+    cout << "/goal         - è®¾ç½®ç”Ÿæˆç›®æ ‡ (ä¾‹å¦‚: /goal çˆ±)" << endl;
+    cout << "/style        - è®¾ç½®ç”Ÿæˆé£æ ¼ (0=STORY, 1=EMOTION, 2=SIMPLE)" << endl;
+    cout << "/status       - æ˜¾ç¤ºç³»ç»ŸçŠ¶æ€" << endl;
+    cout << "/consolidate  - æ‰‹åŠ¨ç¦»çº¿å·©å›º (æŒç»­2åˆ†é’Ÿ)" << endl;
+    cout << "/train        - åœ¨çº¿å­¦ä¹ æ–°æ–‡æœ¬" << endl;
+    cout << "/clear        - æ¸…ç©ºçŸ­æ—¶è®°å¿†" << endl;
+    cout << "/help         - æ˜¾ç¤ºæ­¤å¸®åŠ©" << endl;
+    cout << "ç›´æ¥è¾“å…¥æ–‡æœ¬  - ç”Ÿæˆå›å¤" << endl;
     cout << "================" << endl;
 }
 
@@ -5237,61 +5379,61 @@ int main(){
     srand((unsigned int)time(NULL));
     GrowingAGI agi;
 
-    // ========== Ñ¯ÎÊÊÇ·ñÆôÓÃÈÕÖ¾ ==========
-    cout << "===== »¶Ó­Ê¹ÓÃ AGI ÏµÍ³ =====" << endl;
-    cout << "ÊÇ·ñÆôÓÃÏêÏ¸ÈÕÖ¾£¿£¨½«Ğ´Èë log.txt£©" << endl;
-    cout << "ÊäÈë ÊÇ/·ñ (y/n): ";
+    // ========== è¯¢é—®æ˜¯å¦å¯ç”¨æ—¥å¿— ==========
+    cout << "===== æ¬¢è¿ä½¿ç”¨ AGI ç³»ç»Ÿ =====" << endl;
+    cout << "æ˜¯å¦å¯ç”¨è¯¦ç»†æ—¥å¿—ï¼Ÿï¼ˆå°†å†™å…¥ log.txtï¼‰" << endl;
+    cout << "è¾“å…¥ æ˜¯/å¦ (y/n): ";
     
     string enlog;
     cin >> enlog;
-    cin.ignore();  // Çå³ı»»ĞĞ·û
+    cin.ignore();  // æ¸…é™¤æ¢è¡Œç¬¦
     
-    // ÅĞ¶ÏÓÃ»§ÊäÈë
-    if (enlog == "ÊÇ" || enlog == "yes" || enlog == "y" || enlog == "Y" || enlog == "Yes") {
+    // åˆ¤æ–­ç”¨æˆ·è¾“å…¥
+    if (enlog == "æ˜¯" || enlog == "yes" || enlog == "y" || enlog == "Y" || enlog == "Yes") {
         logger.enable("log.txt");
     } else {
         logger.disable();
-        cout << "ÈÕÖ¾ÒÑ¹Ø±Õ£¬½«Ö»ÏÔÊ¾¹Ø¼üĞÅÏ¢¡£" << endl;
+        cout << "æ—¥å¿—å·²å…³é—­ï¼Œå°†åªæ˜¾ç¤ºå…³é”®ä¿¡æ¯ã€‚" << endl;
     }
-    cout << "ÊÇ·ñÆôÓÃÈÕÖ¾Êä³ö£¿£¨½«°ÑËùÓĞĞÅÏ¢´òÓ¡ÖÁ¿ØÖÆÌ¨£©" << endl;
-    cout << "ÊäÈë ÊÇ/·ñ (y/n): ";
+    cout << "æ˜¯å¦å¯ç”¨æ—¥å¿—è¾“å‡ºï¼Ÿï¼ˆå°†æŠŠæ‰€æœ‰ä¿¡æ¯æ‰“å°è‡³æ§åˆ¶å°ï¼‰" << endl;
+    cout << "è¾“å…¥ æ˜¯/å¦ (y/n): ";
     string enlogoutput;
     cin >> enlogoutput;
-    cin.ignore();  // Çå³ı»»ĞĞ·û
-    if (enlogoutput == "ÊÇ" || enlogoutput == "yes" || enlogoutput == "y" || enlogoutput == "Y" || enlogoutput == "Yes") {
+    cin.ignore();  // æ¸…é™¤æ¢è¡Œç¬¦
+    if (enlogoutput == "æ˜¯" || enlogoutput == "yes" || enlogoutput == "y" || enlogoutput == "Y" || enlogoutput == "Yes") {
 	    logger.enableConsole(true);
-	    cout << "¿ØÖÆÌ¨Êä³öÒÑ¿ªÆô£¬½«ÏÔÊ¾ËùÓĞµ÷ÊÔĞÅÏ¢¡£" << endl;
+	    cout << "æ§åˆ¶å°è¾“å‡ºå·²å¼€å¯ï¼Œå°†æ˜¾ç¤ºæ‰€æœ‰è°ƒè¯•ä¿¡æ¯ã€‚" << endl;
 	} else {
 	    logger.enableConsole(false);
-	    cout << "¿ØÖÆÌ¨Êä³öÒÑ¹Ø±Õ£¬Ö»ÏÔÊ¾¹Ø¼üĞÅÏ¢¡£" << endl;
+	    cout << "æ§åˆ¶å°è¾“å‡ºå·²å…³é—­ï¼Œåªæ˜¾ç¤ºå…³é”®ä¿¡æ¯ã€‚" << endl;
 	}
     cout << "=============================" << endl;
 
-    // ÏÔÊ¾¹¤×÷Ä¿Â¼
+    // æ˜¾ç¤ºå·¥ä½œç›®å½•
     char buffer[256];
     GetCurrentDirectoryA(256, buffer);
-    cout << "µ±Ç°¹¤×÷Ä¿Â¼: " << buffer << endl;
+    cout << "å½“å‰å·¥ä½œç›®å½•: " << buffer << endl;
 
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
-    cout << "¿ÉÓÃÎïÀíÄÚ´æ: " << memInfo.ullAvailPhys / (1024*1024) << " MB" << endl;
-	cout << "==== ²âÊÔÖªÊ¶¿â ====" << endl;
-    cout << "ÖªÊ¶¿âÎÄ¼ş: " << KNOWLEDGE_FILE << endl;
-    // ¼ÓÔØ»òÑµÁ·Ä£ĞÍ
+    cout << "å¯ç”¨ç‰©ç†å†…å­˜: " << memInfo.ullAvailPhys / (1024*1024) << " MB" << endl;
+	cout << "==== æµ‹è¯•çŸ¥è¯†åº“ ====" << endl;
+    cout << "çŸ¥è¯†åº“æ–‡ä»¶: " << KNOWLEDGE_FILE << endl;
+    // åŠ è½½æˆ–è®­ç»ƒæ¨¡å‹
     void* reserveMemory = malloc(100 * 1024 * 1024); 
     memset(reserveMemory, 0, 100 * 1024 * 1024); 
     if (agi.loadModel(MODEL_FILE)) {
-        cout << "===== Ä£ĞÍ¼ÓÔØ³É¹¦ =====" << endl;
+        cout << "===== æ¨¡å‹åŠ è½½æˆåŠŸ =====" << endl;
     } else {
-        cout << "===== ´Ó train.txt ¼ÓÔØÑµÁ·Êı¾İ =====" << endl;
+        cout << "===== ä» train.txt åŠ è½½è®­ç»ƒæ•°æ® =====" << endl;
         string corpus = readFile("train.txt");
         if (corpus.empty()) {
-            cout << "ÑµÁ·Êı¾İÎª¿Õ£¬³ÌĞòÍË³ö£¡" << endl;
+            cout << "è®­ç»ƒæ•°æ®ä¸ºç©ºï¼Œç¨‹åºé€€å‡ºï¼" << endl;
             return -1;
         }
         agi.train(corpus);
-        cout << "===== ÑµÁ·Íê³É =====" << endl;
+        cout << "===== è®­ç»ƒå®Œæˆ =====" << endl;
     }
 	free(reserveMemory);
     showHelp();
@@ -5300,7 +5442,7 @@ int main(){
     bool inSleep = false;
 
     while (true) {
-        cout << "\nÇëÊäÈë£º";
+        cout << "\nè¯·è¾“å…¥ï¼š";
         string input;
         if (cin.peek() != EOF) {
             getline(cin, input);
@@ -5309,7 +5451,7 @@ int main(){
 
             if (input == "exit" || input == "quit") break;
             
-            // ========== ĞÂÔöÃüÁî£ºÊÖ¶¯¿ª¹ØÈÕÖ¾ ==========
+            // ========== æ–°å¢å‘½ä»¤ï¼šæ‰‹åŠ¨å¼€å…³æ—¥å¿— ==========
             if (input == "/log on") {
                 logger.enable("log.txt");
                 continue;
@@ -5319,8 +5461,8 @@ int main(){
                 continue;
             }
             else if (input == "/log status") {
-			    cout << "ÎÄ¼şÈÕÖ¾: " << (logger.isFileEnabled() ? "ÒÑÆôÓÃ" : "ÒÑ½ûÓÃ") << endl;
-			    cout << "¿ØÖÆÌ¨Êä³ö: " << (logger.isConsoleEnabled() ? "ÒÑ¿ªÆô" : "ÒÑ¹Ø±Õ") << endl;
+			    cout << "æ–‡ä»¶æ—¥å¿—: " << (logger.isFileEnabled() ? "å·²å¯ç”¨" : "å·²ç¦ç”¨") << endl;
+			    cout << "æ§åˆ¶å°è¾“å‡º: " << (logger.isConsoleEnabled() ? "å·²å¼€å¯" : "å·²å…³é—­") << endl;
 			    continue;
 			}
             else if (input == "/help") {
@@ -5328,7 +5470,7 @@ int main(){
                 continue;
             }
             else if (input == "/goal") {
-                cout << "ÇëÊäÈëÄ¿±êÎÄ±¾: ";
+                cout << "è¯·è¾“å…¥ç›®æ ‡æ–‡æœ¬: ";
                 string goalStr;
                 getline(cin, goalStr);
                 if (!goalStr.empty()) {
@@ -5337,20 +5479,20 @@ int main(){
                         int goalToken = seq.back();
                         agi.setGoal(goalToken);
                     } else {
-                        cout << "[´íÎó] ÎŞ·¨±àÂëÄ¿±êÎÄ±¾" << endl;
+                        cout << "[é”™è¯¯] æ— æ³•ç¼–ç ç›®æ ‡æ–‡æœ¬" << endl;
                     }
                 }
                 continue;
             }
             else if (input == "/style") {
-                cout << "Ñ¡Ôñ·ç¸ñ (0=STORY, 1=EMOTION, 2=SIMPLE): ";
+                cout << "é€‰æ‹©é£æ ¼ (0=STORY, 1=EMOTION, 2=SIMPLE): ";
                 int style;
                 cin >> style;
                 cin.ignore();
                 if (style >= 0 && style <= 2) {
                     agi.setStyle((StyleIntent)style);
                 } else {
-                    cout << "[´íÎó] ÎŞĞ§µÄ·ç¸ñÑ¡Ôñ" << endl;
+                    cout << "[é”™è¯¯] æ— æ•ˆçš„é£æ ¼é€‰æ‹©" << endl;
                 }
                 continue;
             }
@@ -5359,7 +5501,7 @@ int main(){
                 continue;
             }
             else if (input == "/consolidate") {
-                cout << "¿ªÊ¼ÀëÏß¹®¹Ì... (½«³ÖĞø2·ÖÖÓ£¬ÊäÈëÎÄ±¾¿ÉÖĞ¶Ï)" << endl;
+                cout << "å¼€å§‹ç¦»çº¿å·©å›º... (å°†æŒç»­2åˆ†é’Ÿï¼Œè¾“å…¥æ–‡æœ¬å¯ä¸­æ–­)" << endl;
                 userInputWaiting = true;
                 thread t([&agi]() {
                     agi.manualConsolidate(120);
@@ -5369,7 +5511,7 @@ int main(){
                 continue;
             }
             else if (input == "/train") {
-                cout << "ÇëÊäÈëÑµÁ·ÎÄ±¾: ";
+                cout << "è¯·è¾“å…¥è®­ç»ƒæ–‡æœ¬: ";
                 string trainText; 
                 getline(cin, trainText);
                 if (!trainText.empty()) {
@@ -5381,37 +5523,38 @@ int main(){
                 agi.cortex.shortMemory.clear();
                 agi.cortex.logicAnchorTokens.clear();
                 agi.cortex.workspace.clear();
-                cout << "[ÏµÍ³] ¶ÌÊ±¼ÇÒäÒÑÇå¿Õ" << endl;
+                cout << "[ç³»ç»Ÿ] çŸ­æ—¶è®°å¿†å·²æ¸…ç©º" << endl;
                 continue;
             }
             else if (input.empty()) {
                 continue;
             }
 
-            // ========== Õı³£Éú³É ==========
+            // ========== æ­£å¸¸ç”Ÿæˆ ==========
             if (inSleep) {
                 inSleep = false;
-                cout << "[ÏµÍ³] ÒÑ´ÓĞİÃßÖĞ»½ĞÑ¡£" << endl;
+                cout << "[ç³»ç»Ÿ] å·²ä»ä¼‘çœ ä¸­å”¤é†’ã€‚" << endl;
             }
 
             agi.token.analyzeText(input);
 
             auto outputIds = agi.generate(input, 3);
             string output = agi.token.decode(outputIds);
-            cout << "Êä³ö£º" << output << endl;
+            cout << "è¾“å‡ºï¼š" << output << endl;
 
-			// ========== ĞÂÔö£º·´À¡ÌáÊ¾ ==========
-			cout << "ÆÀ¼Û´ËÊä³ö£¿(+ ÂúÒâ / - ²»ÂúÒâ / »Ø³µÌø¹ı): ";
+			// ========== æ–°å¢ï¼šåé¦ˆæç¤º ==========
+			cout << "è¯„ä»·æ­¤è¾“å‡ºï¼Ÿ(+ æ»¡æ„ / - ä¸æ»¡æ„ / å›è½¦è·³è¿‡): ";
 			string feedback;
 			getline(cin, feedback);
 			
-			// ÔÚ main() »ò GrowingAGI µÄ·´À¡´¦ÀíÖĞ
+			// åœ¨ main() æˆ– GrowingAGI çš„åé¦ˆå¤„ç†ä¸­
 			if (feedback == "+") {
 			    agi.cortex.reinforceActivatedEdges(5);
+			    userModel.recordTurn(agi.token.encode(input), outputIds, true);
 			    agi.saveModel(MODEL_FILE);
-			} 
-			else if (feedback == "-") {
+			} else if (feedback == "-") {
 			    agi.cortex.punishActivatedEdges(5);
+			    userModel.recordTurn(agi.token.encode(input), outputIds, false);
 			    agi.saveModel(MODEL_FILE);
 			}
 			
@@ -5433,8 +5576,8 @@ int main(){
         }
     }
 
-    cout << "\nÕıÔÚ±£´æÄ£ĞÍ..." << endl;
+    cout << "\næ­£åœ¨ä¿å­˜æ¨¡å‹..." << endl;
     agi.saveModel(MODEL_FILE);
-    cout << "Ä£ĞÍÒÑ±£´æ£¬ÔÙ¼û£¡" << endl;
+    cout << "æ¨¡å‹å·²ä¿å­˜ï¼Œå†è§ï¼" << endl;
     return 0;
 }
